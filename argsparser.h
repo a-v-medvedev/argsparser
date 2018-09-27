@@ -270,9 +270,9 @@ class args_parser {
     void get_unknown_args(std::vector<std::string> &r) const;
 
     template <typename T>
-    bool parse_special(const std::string &s, T &r);
+    bool parse_special(const std::string &s, T &r) const;
     template <typename T>
-    bool parse_special_vec(const std::string &s, std::vector<T> &r, char delim = ',', int min = 0, int max = option_vector::MAX_VEC_SIZE);
+    bool parse_special_vec(const std::string &s, std::vector<T> &r, char delim = ',', int min = 0, int max = option_vector::MAX_VEC_SIZE) const;
 
     void clean_args() { argc = 0; }
 #ifdef WITH_YAML_CPP    
@@ -358,7 +358,7 @@ T args_parser::get(const std::string &s) const {
 }
 
 template <typename T>
-bool args_parser::parse_special(const std::string &s, T &r) {
+bool args_parser::parse_special(const std::string &s, T &r) const {
     option_scalar d("[FREE ARG]", get_arg_t<T>());
     bool res = d.do_parse(s.c_str());
     if (res) {
@@ -368,7 +368,7 @@ bool args_parser::parse_special(const std::string &s, T &r) {
 }
 
 template <typename T>
-bool args_parser::parse_special_vec(const std::string &s, std::vector<T> &r, char delim, int min, int max) {
+bool args_parser::parse_special_vec(const std::string &s, std::vector<T> &r, char delim, int min, int max) const {
     option_vector d(*this, "[FREE ARG]", get_arg_t<T>(), delim, min, max);
     bool res = d.do_parse(s.c_str());
     if (res) {
