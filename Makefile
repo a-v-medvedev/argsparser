@@ -30,6 +30,7 @@ install: $(STATIC_LIB) $(SHARED_LIB)
 	@mkdir -p argsparser/include
 	@cp $(SHARED_LIB) argsparser
 	@cp argsparser_iface.h argsparser/include
+	@cp argsparser.h argsparser/include
 
 
 .cpp.o:
