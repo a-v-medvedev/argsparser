@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Alexey V. Medvedev
+ * Copyright (c) 2018-2019 Alexey V. Medvedev
  * This code is an extension of the parts of Intel MPI benchmarks project.
  * It keeps the same Community Source License (CPL) license.
  */
@@ -319,8 +319,8 @@ void args_parser::print_help_advice() const {
 // each next call with FOREACH_NEXT gives a pointer to the next arg from expected_args
 // together with the pointer to the group name it belongs
 // Two versions are here for ordinary and constant methods, mind the 'const' keyword.
-bool args_parser::in_expected_args(enum foreach_t t, const string *&group, smart_ptr<option> *&opt) {
-    static map<const string, vector<smart_ptr<option> > >::iterator it;
+bool args_parser::in_expected_args(enum foreach_t t, const string *&group, std::shared_ptr<option> *&opt) {
+    static map<const string, vector<std::shared_ptr<option> > >::iterator it;
     static size_t j = 0;
     if (t == FOREACH_FIRST) {
         it = expected_args.begin();
@@ -329,7 +329,7 @@ bool args_parser::in_expected_args(enum foreach_t t, const string *&group, smart
     }
     if (t == FOREACH_NEXT) {
         while (it != expected_args.end()) {
-            vector<smart_ptr<option> > &expected_args = it->second;
+            vector<std::shared_ptr<option> > &expected_args = it->second;
             if (j >= expected_args.size()) {
                ++it;
                j = 0;
@@ -345,8 +345,8 @@ bool args_parser::in_expected_args(enum foreach_t t, const string *&group, smart
     return false;
 }
 
-bool args_parser::in_expected_args(enum foreach_t t, const string *&group, const smart_ptr<option> *&opt) const {
-    static map<const string, vector<smart_ptr<option> > >::const_iterator cit;
+bool args_parser::in_expected_args(enum foreach_t t, const string *&group, const std::shared_ptr<option> *&opt) const {
+    static map<const string, vector<std::shared_ptr<option> > >::const_iterator cit;
     static size_t j = 0;
     if (t == FOREACH_FIRST) {
         cit = expected_args.begin();
@@ -355,7 +355,7 @@ bool args_parser::in_expected_args(enum foreach_t t, const string *&group, const
     }
     if (t == FOREACH_NEXT) {
         while (cit != expected_args.end()) {
-            const vector<smart_ptr<option> > &expected_args = cit->second;
+            const vector<std::shared_ptr<option> > &expected_args = cit->second;
             if (j >= expected_args.size()) {
                ++cit;
                j = 0;
@@ -371,7 +371,7 @@ bool args_parser::in_expected_args(enum foreach_t t, const string *&group, const
     return false;
 }
 
-void args_parser::print_single_option_usage(const smart_ptr<option> &opt, size_t header_size, 
+void args_parser::print_single_option_usage(const std::shared_ptr<option> &opt, size_t header_size, 
         bool is_first, bool no_option_name) const {
     string tab(header_size, ' ');
     const char *open_brace = "[";
@@ -403,7 +403,7 @@ void args_parser::print_help() const {
     bool is_first = true;
     bool is_there_sys_group = false, is_there_empty_group = false;
     // help
-    smart_ptr<option> help = new option_scalar(*this, "help", BOOL, value(false)); 
+    std::shared_ptr<option> help = std::make_shared<option_scalar>(*this, "help", BOOL, value(false)); 
     help->flag = true;
     print_single_option_usage(help, size, is_first);
     // help option
@@ -413,7 +413,7 @@ void args_parser::print_help() const {
     print_single_option_usage(help, size, is_first);
     // enumarate all groups which are here
     vector<string> groups;
-    map<const string, vector<smart_ptr<option> > >::const_iterator cit;
+    map<const string, vector<std::shared_ptr<option> > >::const_iterator cit;
     for (cit = expected_args.begin(); cit != expected_args.end(); ++cit) {
         groups.push_back(cit->first);
         if (cit->first == "SYS")
@@ -423,19 +423,19 @@ void args_parser::print_help() const {
     }
     // "SYS" option go first
     if (is_there_sys_group) {
-        const vector<smart_ptr<option> > &args = expected_args.find("SYS")->second;
+        const vector<std::shared_ptr<option> > &args = expected_args.find("SYS")->second;
         for (size_t i = 0; i < args.size(); i++)
             print_single_option_usage(args[i], size, is_first);
     }
     // option from unnamed group go next
     if (is_there_empty_group) {
-        const vector<smart_ptr<option> > &args = expected_args.find("")->second;
+        const vector<std::shared_ptr<option> > &args = expected_args.find("")->second;
         for (size_t i = 0; i < args.size(); i++)
             print_single_option_usage(args[i], size, is_first);
     }
     // options from groups in the order they where added
     for (size_t group = 0; group < groups.size(); group++) {
-        const vector<smart_ptr<option> > &args = expected_args.find(groups[group])->second;
+        const vector<std::shared_ptr<option> > &args = expected_args.find(groups[group])->second;
         if (groups[group] == "EXTRA_ARGS" || groups[group] == "SYS" || groups[group] == "")
             continue;
         sout << tab << groups[group] << ":" << endl;
@@ -444,7 +444,7 @@ void args_parser::print_help() const {
     }
     // extra args
     int num_extra_args = 0, num_required_extra_args = 0;
-    const std::vector<smart_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
+    const std::vector<std::shared_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
     for (int j = 0; j < num_extra_args; j++) 
         print_single_option_usage(extra_args[j], size, is_first, true);
     if (num_extra_args)
@@ -456,10 +456,10 @@ void args_parser::print_help(string str) const {
         sout << program_name << endl;
     bool was_printed = false;
     const string *pgroup;
-    const smart_ptr<option> *popt;
+    const std::shared_ptr<option> *popt;
     in_expected_args(FOREACH_FIRST, pgroup, popt);
     while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
-        const smart_ptr<option> &opt = *popt;
+        const std::shared_ptr<option> &opt = *popt;
         if (opt->str == str) {
             sout << "Option: ";
             print_single_option_usage(opt, 0, true);
@@ -479,15 +479,15 @@ void args_parser::print_help(string str) const {
 
 void args_parser::print() const {
     const string *pgroup;
-    const smart_ptr<option> *popt;
+    const std::shared_ptr<option> *popt;
     in_expected_args(FOREACH_FIRST, pgroup, popt);
     while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
         (*popt)->print();
     }
 }
 
-const vector<smart_ptr<args_parser::option> > &args_parser::get_extra_args_info(int &num_extra_args, int &num_required_extra_args) const {
-    const vector<smart_ptr<option> > &extra_args = expected_args.find("EXTRA_ARGS")->second;
+const vector<std::shared_ptr<args_parser::option> > &args_parser::get_extra_args_info(int &num_extra_args, int &num_required_extra_args) const {
+    const vector<std::shared_ptr<option> > &extra_args = expected_args.find("EXTRA_ARGS")->second;
     bool required_args_ended = false;
     for (size_t j = 0; j < extra_args.size(); j++) {
         if (extra_args[j]->required) {
@@ -503,8 +503,8 @@ const vector<smart_ptr<args_parser::option> > &args_parser::get_extra_args_info(
     return extra_args;
 }
 
-vector<smart_ptr<args_parser::option> > &args_parser::get_extra_args_info(int &num_extra_args, int &num_required_extra_args) {
-    vector<smart_ptr<option> > &extra_args = expected_args["EXTRA_ARGS"];
+vector<std::shared_ptr<args_parser::option> > &args_parser::get_extra_args_info(int &num_extra_args, int &num_required_extra_args) {
+    vector<std::shared_ptr<option> > &extra_args = expected_args["EXTRA_ARGS"];
     for (size_t j = 0; j < extra_args.size(); j++) {
         if (extra_args[j]->required)
             num_required_extra_args++;
@@ -560,7 +560,7 @@ bool args_parser::parse() {
         // go throwgh all expected_args[] elements to find the option by pattern
         bool found = false;
         const string *pgroup;
-        smart_ptr <option> *popt;
+        std::shared_ptr <option> *popt;
         in_expected_args(FOREACH_FIRST, pgroup, popt);
         while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
             if (*pgroup == "EXTRA_ARGS")
@@ -595,7 +595,7 @@ bool args_parser::parse() {
 
     // now parse the expected extra agrs
     int num_extra_args = 0, num_required_extra_args = 0;
-    std::vector<smart_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
+    std::vector<std::shared_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
     if (unknown_args.size() < (size_t)num_required_extra_args) {
         print_err(NO_REQUIRED_EXTRA_ARG, "");
         parse_result = false;
@@ -622,7 +622,7 @@ bool args_parser::parse() {
 
     // loop again through all in expected_args[] to find options which were not given in cmdline
     const string *pgroup;
-    smart_ptr<option> *popt;
+    std::shared_ptr<option> *popt;
     in_expected_args(FOREACH_FIRST, pgroup, popt);
     while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
         if ((*popt)->is_default_setting_required()) {
@@ -648,7 +648,7 @@ bool args_parser::parse() {
 
 args_parser::option &args_parser::set_caption(int n, const char *cap) {
     int num_extra_args = 0, num_required_extra_args = 0;
-    vector<smart_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
+    vector<std::shared_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
     if (n >= num_extra_args)
         throw logic_error("args_parser: no such extra argument");
     extra_args[n]->caption.assign(cap);
@@ -657,7 +657,7 @@ args_parser::option &args_parser::set_caption(int n, const char *cap) {
 
 vector<args_parser::value> args_parser::get_result_value(const string &s) const {
     const string *pgroup;
-    const smart_ptr<option> *popt;
+    const std::shared_ptr<option> *popt;
     in_expected_args(FOREACH_FIRST, pgroup, popt);
     while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
         if ((*popt)->str == s) {
@@ -706,7 +706,7 @@ bool args_parser::load(istream &in_stream) {
 
         // loop through all in expected_args[] to find each option in file
         const string *pgroup;
-        smart_ptr<option> *popt;
+        std::shared_ptr<option> *popt;
         in_expected_args(FOREACH_FIRST, pgroup, popt);
         while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
             if (*pgroup == "SYS" || *pgroup == "EXTRA_ARGS")
@@ -717,7 +717,7 @@ bool args_parser::load(istream &in_stream) {
             }
         }
         int num_extra_args = 0, num_required_extra_args = 0;
-        std::vector<smart_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
+        std::vector<std::shared_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
         if (stream["extra_args"]) {
             const YAML::Node Name = stream["extra_args"].as<YAML::Node>();
             int j = 0;
@@ -751,7 +751,7 @@ string args_parser::dump() const {
     out << YAML::Key << "version";
     out << YAML::Value << version;
     const string *pgroup;
-    const smart_ptr<option> *popt;
+    const std::shared_ptr<option> *popt;
     in_expected_args(FOREACH_FIRST, pgroup, popt);
     while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
         if (*pgroup == "SYS" || *pgroup == "EXTRA_ARGS")
@@ -769,7 +769,7 @@ string args_parser::dump() const {
         }
     }
     int num_extra_args = 0, num_required_extra_args = 0;
-    const std::vector<smart_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
+    const std::vector<std::shared_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
     if (num_extra_args > 0) {
         out << YAML::Key << "extra_args";
         out << YAML::Value << YAML::BeginSeq << YAML::Newline;
@@ -798,7 +798,7 @@ bool args_parser::is_option(const string &str) const {
 
 bool args_parser::is_option_defaulted(const std::string &str) const {
     const string *pgroup;
-    const smart_ptr<option> *popt;
+    const std::shared_ptr<option> *popt;
     in_expected_args(FOREACH_FIRST, pgroup, popt);
     while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
         if ((*popt)->str == str) {

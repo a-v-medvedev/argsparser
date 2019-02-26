@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Alexey V. Medvedev
+ * Copyright (c) 2018-2019 Alexey V. Medvedev
  * This code is an extension of the parts of Intel MPI benchmarks project.
  * It keeps the same Community Source License (CPL) license.
  */
@@ -70,7 +70,15 @@ goods and services.
 using namespace std;
 
 //-- UNIT TESTS ----------------------------------------------------------------------------------
-#if 1
+#if 0
+
+/*
+int main()
+{
+    check_parser();
+    return 0;
+}
+*/
 
 void print_args(int nargs, const char * const *argv) {
     cout << ":: ";
@@ -84,15 +92,15 @@ void print_args(int nargs, const char * const *argv) {
 struct CheckParser {
     bool result;
     bool except;
-    smart_ptr<args_parser> pparser;
+    shared_ptr<args_parser> pparser;
     ostringstream output;
     CheckParser() : result(false), except(false) {}
     args_parser &init(int argc, char ** argv, int mode = 1) {
         print_args(argc, argv);
         switch (mode) {
-            case 1: pparser = new args_parser(argc, argv, "-", ' ', output); break;
-            case 2: pparser = new args_parser(argc, argv, "--", '=', output); break;
-            case 3: pparser = new args_parser(argc, argv, "/", ':', output); break;
+            case 1: pparser = std::make_shared<args_parser>(argc, argv, "-", ' ', output); break;
+            case 2: pparser = std::make_shared<args_parser>(argc, argv, "--", '=', output); break;
+            case 3: pparser = std::make_shared<args_parser>(argc, argv, "/", ':', output); break;
             default: assert(false);
         }
         return *pparser;

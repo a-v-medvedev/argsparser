@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Alexey V. Medvedev
+ * Copyright (c) 2018-2019 Alexey V. Medvedev
  * This code is an extension of the parts of Intel MPI benchmarks project.
  * It keeps the same Community Source License (CPL) license.
  */
@@ -66,7 +66,7 @@ goods and services.
 #include <map>
 #include <set>
 #include <stdexcept>
-#include "smart_ptr.h"
+#include <memory>
 #ifdef WITH_YAML_CPP
 #include "yaml-cpp/yaml.h"
 #endif
@@ -218,7 +218,7 @@ class args_parser {
     protected:
     std::set<flag_t> flags;
     std::string current_group;
-    std::map<std::string, std::vector<smart_ptr<option> > > expected_args;
+    std::map<std::string, std::vector<std::shared_ptr<option>>> expected_args;
     std::vector<std::string> unknown_args;
     option *prev_option;
     error_t last_error;
@@ -230,11 +230,11 @@ class args_parser {
     bool get_value(const std::string &arg, option &exp);
     void get_default_value(option &d);
     
-    const std::vector<smart_ptr<args_parser::option> > &get_extra_args_info(int &num_extra_args, int &num_required_extra_args) const;
-    std::vector<smart_ptr<args_parser::option> > &get_extra_args_info(int &num_extra_args, int &num_required_extra_args);
+    const std::vector<std::shared_ptr<args_parser::option>> &get_extra_args_info(int &num_extra_args, int &num_required_extra_args) const;
+    std::vector<std::shared_ptr<args_parser::option>> &get_extra_args_info(int &num_extra_args, int &num_required_extra_args);
 
     void print_err(error_t err, std::string arg, std::string extra = "");
-    void print_single_option_usage(const smart_ptr<option> &d, size_t header_size, bool is_first, bool no_option_name = false) const;
+    void print_single_option_usage(const std::shared_ptr<option> &d, size_t header_size, bool is_first, bool no_option_name = false) const;
 
     std::vector<value> get_result_value(const std::string &s) const;
 
@@ -292,8 +292,8 @@ class args_parser {
     protected:
     // NOTE: see source for usage comments
     enum foreach_t { FOREACH_FIRST, FOREACH_NEXT };
-    bool in_expected_args(enum foreach_t t, const std::string *&group, smart_ptr<option> *&arg);    
-    bool in_expected_args(enum foreach_t t, const std::string *&group, const smart_ptr<option> *&arg) const;    
+    bool in_expected_args(enum foreach_t t, const std::string *&group, std::shared_ptr<option> *&arg);    
+    bool in_expected_args(enum foreach_t t, const std::string *&group, const std::shared_ptr<option> *&arg) const;    
 };
 
 template <typename T> args_parser::arg_t get_arg_t();
@@ -312,14 +312,14 @@ void vresult_to_vector(const std::vector<args_parser::value> &in, std::vector<T>
 
 template <typename T>
 args_parser::option &args_parser::add(const char *s) {
-    smart_ptr<option> popt = new args_parser::option_scalar(*this, s, get_arg_t<T>());
+    std::shared_ptr<option> popt = std::make_shared<args_parser::option_scalar>(*this, s, get_arg_t<T>());
     expected_args[current_group].push_back(popt);
     return *popt.get();
 }
 
 template <typename T>
 args_parser::option &args_parser::add(const char *s, T v) {
-    smart_ptr<option> popt = new args_parser::option_scalar(*this, s, get_arg_t<T>(), value(v));
+    std::shared_ptr<option> popt = std::make_shared<args_parser::option_scalar>(*this, s, get_arg_t<T>(), value(v));
     expected_args[current_group].push_back(popt);
     return *popt.get();
 }
@@ -328,7 +328,7 @@ template <typename T>
 args_parser::option &args_parser::add_vector(const char *s, char delim, int min, int max) {
     if (max > option_vector::MAX_VEC_SIZE)
         throw std::logic_error("args_parser: maximum allowed vector size for vector argument exceeded");
-    smart_ptr<option> popt = new args_parser::option_vector(*this, s, get_arg_t<T>(), delim, min, max);
+    std::shared_ptr<option> popt = std::make_shared<args_parser::option_vector>(*this, s, get_arg_t<T>(), delim, min, max);
     expected_args[current_group].push_back(popt);
     return *popt.get();
 }
@@ -337,7 +337,7 @@ template <typename T>
 args_parser::option &args_parser::add_vector(const char *s, const char *defaults, char delim, int min, int max) {
     if (max > option_vector::MAX_VEC_SIZE)
         throw std::logic_error("args_parser: maximum allowed vector size for vector argument exceeded");
-    smart_ptr<option> popt = new args_parser::option_vector(*this, s, get_arg_t<T>(), delim, min, max, defaults); 
+    std::shared_ptr<option> popt = std::make_shared<args_parser::option_vector>(*this, s, get_arg_t<T>(), delim, min, max, defaults); 
     expected_args[current_group].push_back(popt);
     return *popt.get();
 }
