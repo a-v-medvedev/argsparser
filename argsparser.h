@@ -90,7 +90,7 @@ class args_parser {
                                                                          sout(_sout),
                                                                          prev_option(NULL),
                                                                          last_error(NONE)  
-    {}
+    { auto &dummy = expected_args["EXTRA_ARGS"]; (void)dummy; } 
     typedef enum { STRING, INT, FLOAT, BOOL } arg_t;
     typedef enum { ALLOW_UNEXPECTED_ARGS, SILENT, NOHELP, NODUPLICATE /*, NODEFAULTSDUMP*/ } flag_t;
     typedef enum { NONE, NO_REQUIRED_OPTION, NO_REQUIRED_EXTRA_ARG, PARSE_ERROR_OPTION, PARSE_ERROR_EXTRA_ARGS, UNKNOWN_EXTRA_ARGS } error_t;
@@ -147,6 +147,7 @@ class args_parser {
         virtual bool is_default_setting_required() = 0;
         virtual bool is_required_but_not_set() = 0;
         virtual std::vector<args_parser::value> get_value_as_vector() const = 0;
+        virtual bool get_value_as_map(std::map<std::string, std::string> &r) const = 0;
         virtual void to_ostream(std::ostream &s) const = 0;
         friend std::ostream &operator<<(std::ostream &s, const args_parser::option &d);
 #ifdef WITH_YAML_CPP        
@@ -177,6 +178,7 @@ class args_parser {
         virtual bool is_default_setting_required() { return !val.is_initialized() && !required; }
         virtual bool is_required_but_not_set() { return required && !val.is_initialized(); }
         virtual std::vector<args_parser::value> get_value_as_vector() const { std::vector<args_parser::value> r; r.push_back(val); return r; }
+        virtual bool get_value_as_map(std::map<std::string, std::string> &) const { return false; }
     };
     struct option_vector : public option {
         enum { MAX_VEC_SIZE = 1024 };
@@ -211,9 +213,40 @@ class args_parser {
 #endif        
         virtual void set_default_value();
         virtual bool is_default_setting_required() { return val.size() == 0 && !required; }
-        virtual bool is_required_but_not_set() { return required && vec_min != 0 && !val.size() ==0; }
+        virtual bool is_required_but_not_set() { return required && vec_min != 0 && val.size() == 0; }
         virtual std::vector<args_parser::value> get_value_as_vector() const { return val; }
+        virtual bool get_value_as_map(std::map<std::string, std::string> &) const { return false; }
     };
+    struct option_map : public option {
+        enum { MAX_VEC_SIZE = 1024 };
+        char vec_delimiter;
+        char vec_delimiter_2;
+        int num_already_initialized_elems;
+        std::vector<args_parser::value> val;
+        std::map<std::string, std::string> kvmap;
+        option_map(const args_parser &_parser, const std::string &_str, 
+                     char _vec_delimiter, char _vec_delimiter_2)  :
+            option(_parser, _str, STRING, true), vec_delimiter(_vec_delimiter), vec_delimiter_2(_vec_delimiter_2)
+        { num_already_initialized_elems = 0; }
+        virtual ~option_map() {}
+        virtual void print() const {
+            parser.sout << str << ": ";
+            to_ostream(parser.sout);
+            parser.sout << std::endl;
+        }
+        virtual bool do_parse(const char *sval);
+        virtual bool is_scalar() const { return false; }
+        virtual void to_ostream(std::ostream &s) const { for (size_t i = 0; i < val.size(); i++) { s << val[i]; if (i != val.size()) s << ", "; } }
+#ifdef WITH_YAML_CPP        
+        virtual void to_yaml(YAML::Emitter& out) const;
+        virtual void from_yaml(const YAML::Node& node);
+#endif        
+        virtual void set_default_value();
+        virtual bool is_default_setting_required() { return val.size() == 0 && !required; }
+        virtual bool is_required_but_not_set() { return false; }
+        virtual std::vector<args_parser::value> get_value_as_vector() const { return val; }
+        virtual bool get_value_as_map(std::map<std::string, std::string> &r) const { r = kvmap; return true; }
+    };    
 
     protected:
     std::set<flag_t> flags;
@@ -229,14 +262,17 @@ class args_parser {
     bool match(std::string &arg, option &exp) const;
     bool get_value(const std::string &arg, option &exp);
     void get_default_value(option &d);
-    
-    const std::vector<std::shared_ptr<args_parser::option>> &get_extra_args_info(int &num_extra_args, int &num_required_extra_args) const;
-    std::vector<std::shared_ptr<args_parser::option>> &get_extra_args_info(int &num_extra_args, int &num_required_extra_args);
+ 
+
+    void get_extra_args_num(int &num_extra_args, int &num_required_extra_args) const;
+    std::vector<std::shared_ptr<option>>  &get_extra_args_info(int &num_extra_args, int &num_required_extra_args);
+    const std::vector<std::shared_ptr<option>>  &get_extra_args_info(int &num_extra_args, int &num_required_extra_args) const;
 
     void print_err(error_t err, std::string arg, std::string extra = "");
-    void print_single_option_usage(const std::shared_ptr<option> &d, size_t header_size, bool is_first, bool no_option_name = false) const;
+    void print_single_option_usage(const std::shared_ptr<option> &d, const std::string &header, bool no_option_name = false) const;
 
     std::vector<value> get_result_value(const std::string &s) const;
+    void get_result_map(const std::string &s, std::map<std::string, std::string> &r) const;
 
     public:
     args_parser &set_program_name(const std::string name) { program_name = name; return *this; }
@@ -257,6 +293,7 @@ class args_parser {
     option &add_vector(const char *s, char delim = ',', int min = 0, int max = option_vector::MAX_VEC_SIZE);
     template <typename T>
     option &add_vector(const char *s, const char *defaults, char delim = ',', int min = 0, int max = option_vector::MAX_VEC_SIZE);
+    args_parser::option &add_map(const char *s, char delim1 = ':', char delim2 = ',');
 
     args_parser &set_current_group(const std::string &g) { current_group = g; return *this; }
     args_parser &set_default_current_group() { current_group = ""; return *this; }
@@ -267,6 +304,7 @@ class args_parser {
     T get(const std::string &s) const;
     template <typename T>
     void get(const std::string &s, std::vector<T> &r) const;
+    void get(const std::string &s, std::map<std::string, std::string> &r) const;
     void get_unknown_args(std::vector<std::string> &r) const;
 
     template <typename T>
@@ -341,7 +379,6 @@ args_parser::option &args_parser::add_vector(const char *s, const char *defaults
     expected_args[current_group].push_back(popt);
     return *popt.get();
 }
-
 template <typename T>
 void args_parser::get(const std::string &s, std::vector<T> &r) const {
     std::vector<value> v = get_result_value(s);

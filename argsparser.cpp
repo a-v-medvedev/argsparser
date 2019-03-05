@@ -173,19 +173,36 @@ void operator>> (const YAML::Node& node, args_parser::option &opt) {
 void args_parser::option_scalar::to_yaml(YAML::Emitter& out) const { out << val; }
 void args_parser::option_scalar::from_yaml(const YAML::Node& node) { val.type = type; node >> val; }
 
-void args_parser::option_vector::to_yaml(YAML::Emitter& out) const { out << val; }
+void args_parser::option_vector::to_yaml(YAML::Emitter& out) const { out << YAML::Flow << val; }
 void args_parser::option_vector::from_yaml(const YAML::Node& node) 
 {
-    //node >> val;
     assert(node.IsSequence());
     val.resize(node.size());
     for (size_t i = 0; i < val.size(); i++) {
         val[i].type = type;
         node[i] >> val[i];
     }
-//    val = node.as<std::vector<args_parser::value> >();
     assert(val.size() >= (size_t)vec_min && val.size() <= (size_t)vec_max);
 }
+
+void args_parser::option_map::to_yaml(YAML::Emitter& out) const { 
+    out << YAML::BeginMap << YAML::Flow;
+    for (auto it = kvmap.begin(); it != kvmap.end(); ++it) {
+        out << YAML::Key << it->first << YAML::Value << it->second;
+    }
+    out << YAML::EndMap;
+}
+void args_parser::option_map::from_yaml(const YAML::Node& node) 
+{
+    assert(node.IsMap());
+    for (auto it = node.begin(); it != node.end(); ++it) {
+        std::string key, value;
+        key = it->first.as<std::string>();
+        value = it->second.as<std::string>();
+        kvmap[key] = value;
+    }
+}
+
 #endif
 
 bool args_parser::option_scalar::do_parse(const char *sval) {
@@ -230,10 +247,69 @@ void args_parser::option_vector::set_default_value() {
     }
 }
 
+
+#include <sstream>
+
+static void str_split(const std::string& s, char delimiter, std::vector<std::string> &result)
+{
+   std::string token;
+   std::istringstream token_stream(s);
+   while (std::getline(token_stream, token, delimiter)) {
+      result.push_back(token);
+   }
+}
+
+
+bool args_parser::option_map::do_parse(const char *const_sval) {
+    bool res = true;
+    string sval(const_sval);
+    std::vector<int> positions;
+    for (const char *s = sval.c_str(); *s; s++) {
+        if (*s == vec_delimiter)
+            positions.push_back(s - sval.c_str());
+    }
+    positions.push_back(sval.size());
+    size_t nelems = sval.size() ? positions.size() : 0;
+    size_t max_elem = num_already_initialized_elems + nelems;
+    val.resize(std::max(max_elem, val.size()));
+    if (nelems == 0) 
+        return true;
+    for (size_t i = 0, j = 0; i < positions.size(); i++) {
+        sval[positions[i]] = 0;
+        int n = num_already_initialized_elems + i;
+        if (val[n].initialized && parser.is_flag_set(NODUPLICATE))
+            return false;
+        res = res && val[n].parse(sval.c_str() + j, type);
+        j = positions[i] + 1;
+    }
+    if (!res)
+        return false;
+    num_already_initialized_elems += positions.size();
+    for (auto v : val) {
+        std::vector<std::string> kv;
+        str_split(v.str, '=', kv);
+        if (kv.size() != 2)
+            return false;;
+        kvmap[kv[0]] = kv[1];
+    }
+    return true;
+}
+
+void args_parser::option_map::set_default_value() {
+}
+
 args_parser::option &args_parser::add_flag(const char *s) {
     option &opt = add<bool>(s, false);
     opt.flag = true;
     return opt;
+}
+
+args_parser::option &args_parser::add_map(const char *s, char delim1, char delim2) {
+    std::shared_ptr<option> popt = std::make_shared<args_parser::option_map>(*this, s, delim1, delim2);
+    if (delim1 == delim2)
+        throw std::logic_error("args_parser: two delimiters in map-type option must not be the same");
+    expected_args[current_group].push_back(popt);
+    return *popt.get();
 }
 
 bool args_parser::match(string &arg, string pattern) const {
@@ -371,9 +447,8 @@ bool args_parser::in_expected_args(enum foreach_t t, const string *&group, const
     return false;
 }
 
-void args_parser::print_single_option_usage(const std::shared_ptr<option> &opt, size_t header_size, 
-        bool is_first, bool no_option_name) const {
-    string tab(header_size, ' ');
+void args_parser::print_single_option_usage(const std::shared_ptr<option> &opt, const std::string &header, 
+        bool no_option_name) const {
     const char *open_brace = "[";
     const char *close_brace = "]";
     const char *empty = "";
@@ -381,7 +456,7 @@ void args_parser::print_single_option_usage(const std::shared_ptr<option> &opt, 
     const char *close = opt->required ? empty : close_brace;
     const string stype = value::get_type_str(opt->type);
     const string cap = (opt->caption.size() == 0 ? stype : opt->caption);
-    const string allign = (is_first ? "" : tab);
+    const string allign = header;
     if (no_option_name)
         sout << allign << open << cap << close << " ";
     else if (opt->flag)
@@ -393,24 +468,24 @@ void args_parser::print_single_option_usage(const std::shared_ptr<option> &opt, 
 void args_parser::print_help() const {
     if (program_name.size() != 0)
         sout << program_name << endl;
-    sout << "Usage: " << (argv ? basename(argv[0]) : "") << " ";
-    string header;
-    header +=  "Usage: ";
-    header += (argv ? basename(argv[0]) : ""); 
-    header += " ";
-    size_t size = min(header.size(), (size_t)16);
+    string header1, header2;
+    header1 +=  "Usage: ";
+    header2 += (argv ? basename(argv[0]) : ""); 
+    header2 += " ";
+    sout << header1 << header2;
+    size_t size = min(header1.size() + header2.size(), (size_t)16);
+    string header3(header1.size(), ' ');
+    string header4(header1.size() + header2.size(), ' ');
     string tab(size - 2, ' ');
-    bool is_first = true;
     bool is_there_sys_group = false, is_there_empty_group = false;
     // help
-    std::shared_ptr<option> help = std::make_shared<option_scalar>(*this, "help", BOOL, value(false)); 
-    help->flag = true;
-    print_single_option_usage(help, size, is_first);
+    std::shared_ptr<option> helpopt = std::make_shared<option_scalar>(*this, "help", BOOL); 
+    helpopt->flag = true;
+    print_single_option_usage(helpopt, "");
     // help option
-    is_first = false;
-    help->flag = false;
-    help->set_caption("option");
-    print_single_option_usage(help, size, is_first);
+    helpopt->flag = false;
+    helpopt->set_caption("option");
+    print_single_option_usage(helpopt, header3+header2);
     // enumarate all groups which are here
     vector<string> groups;
     map<const string, vector<std::shared_ptr<option> > >::const_iterator cit;
@@ -421,17 +496,22 @@ void args_parser::print_help() const {
         if (cit->first == "")
             is_there_empty_group = true;
     }
+    std::string opt_header = header3 + header2;
     // "SYS" option go first
     if (is_there_sys_group) {
         const vector<std::shared_ptr<option> > &args = expected_args.find("SYS")->second;
-        for (size_t i = 0; i < args.size(); i++)
-            print_single_option_usage(args[i], size, is_first);
+        for (size_t i = 0; i < args.size(); i++) {
+            print_single_option_usage(args[i], opt_header);
+            opt_header = header4;
+        }
     }
     // option from unnamed group go next
     if (is_there_empty_group) {
         const vector<std::shared_ptr<option> > &args = expected_args.find("")->second;
-        for (size_t i = 0; i < args.size(); i++)
-            print_single_option_usage(args[i], size, is_first);
+        for (size_t i = 0; i < args.size(); i++) {
+            print_single_option_usage(args[i], opt_header);
+            opt_header = header4;
+        }
     }
     // options from groups in the order they where added
     for (size_t group = 0; group < groups.size(); group++) {
@@ -439,14 +519,18 @@ void args_parser::print_help() const {
         if (groups[group] == "EXTRA_ARGS" || groups[group] == "SYS" || groups[group] == "")
             continue;
         sout << tab << groups[group] << ":" << endl;
-        for (size_t i = 0; i < args.size(); i++)
-            print_single_option_usage(args[i], size, is_first);
+        for (size_t i = 0; i < args.size(); i++) {
+            print_single_option_usage(args[i], opt_header);
+            opt_header = header4;
+        }
     }
     // extra args
     int num_extra_args = 0, num_required_extra_args = 0;
-    const std::vector<std::shared_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
-    for (int j = 0; j < num_extra_args; j++) 
-        print_single_option_usage(extra_args[j], size, is_first, true);
+    auto &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
+    for (int j = 0; j < num_extra_args; j++) {
+        print_single_option_usage(extra_args[j], opt_header, true);
+        opt_header = header4;
+    }
     if (num_extra_args)
         sout << endl;
 }
@@ -462,7 +546,7 @@ void args_parser::print_help(string str) const {
         const std::shared_ptr<option> &opt = *popt;
         if (opt->str == str) {
             sout << "Option: ";
-            print_single_option_usage(opt, 0, true);
+            print_single_option_usage(opt, "", false);
             if (*pgroup != "SYS" && *pgroup != "")
                 sout << "Group: " << *pgroup << endl;
             if (opt->description != "") {
@@ -486,8 +570,10 @@ void args_parser::print() const {
     }
 }
 
-const vector<std::shared_ptr<args_parser::option> > &args_parser::get_extra_args_info(int &num_extra_args, int &num_required_extra_args) const {
-    const vector<std::shared_ptr<option> > &extra_args = expected_args.find("EXTRA_ARGS")->second;
+void args_parser::get_extra_args_num(int &num_extra_args, int &num_required_extra_args) const {
+    auto it = expected_args.find("EXTRA_ARGS");
+    assert(it != expected_args.end());
+    auto &extra_args = it->second;
     bool required_args_ended = false;
     for (size_t j = 0; j < extra_args.size(); j++) {
         if (extra_args[j]->required) {
@@ -500,17 +586,20 @@ const vector<std::shared_ptr<args_parser::option> > &args_parser::get_extra_args
 
     } 
     num_extra_args = extra_args.size();
-    return extra_args;
 }
 
-vector<std::shared_ptr<args_parser::option> > &args_parser::get_extra_args_info(int &num_extra_args, int &num_required_extra_args) {
-    vector<std::shared_ptr<option> > &extra_args = expected_args["EXTRA_ARGS"];
-    for (size_t j = 0; j < extra_args.size(); j++) {
-        if (extra_args[j]->required)
-            num_required_extra_args++;
-    } 
-    num_extra_args = extra_args.size();
-    return extra_args;
+const std::vector<std::shared_ptr<args_parser::option>> &args_parser::get_extra_args_info(int &num_extra_args, int &num_required_extra_args) const {
+    auto it = expected_args.find("EXTRA_ARGS");
+    assert(it != expected_args.end());
+    get_extra_args_num(num_extra_args, num_required_extra_args);
+    return it->second;
+}
+
+std::vector<std::shared_ptr<args_parser::option>> &args_parser::get_extra_args_info(int &num_extra_args, int &num_required_extra_args) {
+    auto it = expected_args.find("EXTRA_ARGS");
+    assert(it != expected_args.end());
+    get_extra_args_num(num_extra_args, num_required_extra_args);
+    return it->second;
 }
 
 void args_parser::get_command_line(std::string &result) const {
@@ -556,6 +645,7 @@ bool args_parser::parse() {
             }
             parse_result = false;
             help_printed = true;
+            return parse_result;
         }
         // go throwgh all expected_args[] elements to find the option by pattern
         bool found = false;
@@ -595,7 +685,7 @@ bool args_parser::parse() {
 
     // now parse the expected extra agrs
     int num_extra_args = 0, num_required_extra_args = 0;
-    std::vector<std::shared_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
+    auto &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
     if (unknown_args.size() < (size_t)num_required_extra_args) {
         print_err(NO_REQUIRED_EXTRA_ARG, "");
         parse_result = false;
@@ -648,7 +738,7 @@ bool args_parser::parse() {
 
 args_parser::option &args_parser::set_caption(int n, const char *cap) {
     int num_extra_args = 0, num_required_extra_args = 0;
-    vector<std::shared_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
+    auto &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
     if (n >= num_extra_args)
         throw logic_error("args_parser: no such extra argument");
     extra_args[n]->caption.assign(cap);
@@ -667,6 +757,25 @@ vector<args_parser::value> args_parser::get_result_value(const string &s) const 
     throw logic_error("args_parser: no such option");
 }
 
+void args_parser::get_result_map(const string &s, std::map<std::string, std::string> &r) const {
+    const string *pgroup;
+    const std::shared_ptr<option> *popt;
+    in_expected_args(FOREACH_FIRST, pgroup, popt);
+    while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
+        if ((*popt)->str == s) {
+            if (!(*popt)->get_value_as_map(r))
+                throw logic_error("args_parser: no such option");
+            else
+                return;
+        }
+    }
+    throw logic_error("args_parser: no such option");
+}
+
+void args_parser::get(const std::string &s, std::map<std::string, std::string> &r) const {
+    get_result_map(s, r);
+}
+
 void args_parser::get_unknown_args(vector<string> &r) const {
     for (size_t j = 0; j < unknown_args.size(); j++) {
         r.push_back(unknown_args[j]);
@@ -674,32 +783,6 @@ void args_parser::get_unknown_args(vector<string> &r) const {
 }
 
 #ifdef WITH_YAML_CPP
-/*
-namespace YAML {
-    template <>
-    struct convert<args_parser::value> {
-        static Node encode(const args_parser::value &rhs) {
-            Node node;
-            if (rhs.is_initialized()) {
-                switch(rhs.type) {
-                    case args_parser::STRING: node = rhs.str.c_str(); break;
-                    case args_parser::INT: node = rhs.i; break;
-                    case args_parser::FLOAT: node = rhs.f; break;
-                    case args_parser::BOOL: node = rhs.b; break;
-                    default: assert(NULL == "Impossible case in switch(type)");
-               }
-            }
-            return node;
-        }
-        static bool decode(const Node &node, args_parser::value &rhs) {
-            if (!node.IsScalar())
-                return false;
-            node >> rhs;
-            return true;
-        }
-    };
-}
-*/
 bool args_parser::load(istream &in_stream) {
     try {
         YAML::Node stream = YAML::Load(in_stream);
@@ -717,7 +800,7 @@ bool args_parser::load(istream &in_stream) {
             }
         }
         int num_extra_args = 0, num_required_extra_args = 0;
-        std::vector<std::shared_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
+        auto &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
         if (stream["extra_args"]) {
             const YAML::Node Name = stream["extra_args"].as<YAML::Node>();
             int j = 0;
@@ -769,7 +852,7 @@ string args_parser::dump() const {
         }
     }
     int num_extra_args = 0, num_required_extra_args = 0;
-    const std::vector<std::shared_ptr<option> > &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
+    auto &extra_args = get_extra_args_info(num_extra_args, num_required_extra_args);
     if (num_extra_args > 0) {
         out << YAML::Key << "extra_args";
         out << YAML::Value << YAML::BeginSeq << YAML::Newline;
