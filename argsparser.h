@@ -220,14 +220,17 @@ class args_parser {
     struct option_map : public option {
         enum { MAX_VEC_SIZE = 1024 };
         char vec_delimiter;
-        char vec_delimiter_2;
         int num_already_initialized_elems;
         std::vector<args_parser::value> val;
+        std::string vec_def;
         std::map<std::string, std::string> kvmap;
-        option_map(const args_parser &_parser, const std::string &_str, 
-                     char _vec_delimiter, char _vec_delimiter_2)  :
-            option(_parser, _str, STRING, true), vec_delimiter(_vec_delimiter), vec_delimiter_2(_vec_delimiter_2)
+        option_map(const args_parser &_parser, const std::string &_str, char _vec_delimiter)  :
+            option(_parser, _str, STRING, true), vec_delimiter(_vec_delimiter)
         { num_already_initialized_elems = 0; }
+        option_map(const args_parser &_parser, const std::string &_str, const std::string &_vec_def, char _vec_delimiter)  :
+            option(_parser, _str, STRING, false), vec_delimiter(_vec_delimiter), vec_def(_vec_def)
+        { num_already_initialized_elems = 0; }
+
         virtual ~option_map() {}
         virtual void print() const {
             parser.sout << str << ": ";
@@ -293,7 +296,8 @@ class args_parser {
     option &add_vector(const char *s, char delim = ',', int min = 0, int max = option_vector::MAX_VEC_SIZE);
     template <typename T>
     option &add_vector(const char *s, const char *defaults, char delim = ',', int min = 0, int max = option_vector::MAX_VEC_SIZE);
-    args_parser::option &add_map(const char *s, char delim1 = ':', char delim2 = ',');
+    args_parser::option &add_map(const char *s, char delim1 = ':');
+    args_parser::option &add_map(const char *s, const char *def, char delim1 = ':');
 
     args_parser &set_current_group(const std::string &g) { current_group = g; return *this; }
     args_parser &set_default_current_group() { current_group = ""; return *this; }

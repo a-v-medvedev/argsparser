@@ -296,6 +296,11 @@ bool args_parser::option_map::do_parse(const char *const_sval) {
 }
 
 void args_parser::option_map::set_default_value() {
+    if (num_already_initialized_elems == 0) {
+        do_parse(vec_def.c_str());
+        defaulted = true;
+        num_already_initialized_elems = 0;
+    }
 }
 
 args_parser::option &args_parser::add_flag(const char *s) {
@@ -304,10 +309,14 @@ args_parser::option &args_parser::add_flag(const char *s) {
     return opt;
 }
 
-args_parser::option &args_parser::add_map(const char *s, char delim1, char delim2) {
-    std::shared_ptr<option> popt = std::make_shared<args_parser::option_map>(*this, s, delim1, delim2);
-    if (delim1 == delim2)
-        throw std::logic_error("args_parser: two delimiters in map-type option must not be the same");
+args_parser::option &args_parser::add_map(const char *s, char delim1) {
+    std::shared_ptr<option> popt = std::make_shared<args_parser::option_map>(*this, s, delim1);
+    expected_args[current_group].push_back(popt);
+    return *popt.get();
+}
+
+args_parser::option &args_parser::add_map(const char *s, const char *def, char delim1) {
+    std::shared_ptr<option> popt = std::make_shared<args_parser::option_map>(*this, s, def, delim1);
     expected_args[current_group].push_back(popt);
     return *popt.get();
 }
