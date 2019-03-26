@@ -261,8 +261,8 @@ class args_parser {
     std::string last_error_option;
     std::string last_error_extra;
    
-    bool match(std::string &arg, std::string pattern) const;
-    bool match(std::string &arg, option &exp) const;
+    bool match(const std::string &arg, const std::string &pattern) const;
+    bool match(const std::string &arg, option &exp) const;
     bool get_value(const std::string &arg, option &exp);
     void get_default_value(option &d);
  
@@ -324,6 +324,7 @@ class args_parser {
 #endif    
     bool is_option(const std::string &str) const;
     bool is_option_defaulted(const std::string &str) const;
+    bool is_help_mode() const;
 
     error_t get_last_error(std::string &option, std::string &extra) {
         option = last_error_option;

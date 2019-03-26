@@ -321,7 +321,7 @@ args_parser::option &args_parser::add_map(const char *s, const char *def, char d
     return *popt.get();
 }
 
-bool args_parser::match(string &arg, string pattern) const {
+bool args_parser::match(const string &arg, const string &pattern) const {
     if (strncmp(arg.c_str(), option_starter, strlen(option_starter)))
         return false;
     if (strncmp(arg.c_str() + strlen(option_starter), pattern.c_str(), pattern.size()))
@@ -331,7 +331,7 @@ bool args_parser::match(string &arg, string pattern) const {
     return true;
 }
 
-bool args_parser::match(string &arg, option &opt) const {
+bool args_parser::match(const string &arg, option &opt) const {
     return match(arg, opt.str);
 }
 
@@ -625,7 +625,6 @@ bool args_parser::parse() {
     if (!argv && argc != 0)
         return false;
     bool parse_result = true;
-    bool help_printed = false;
     unknown_args.resize(0);
     // go through all given args
     for (int i = 1; i < argc; i++) {
@@ -646,14 +645,13 @@ bool args_parser::parse() {
             continue;
         }
         // help is hardcoded as and optional 1st arg
-        if (i == 1 && match(arg, string("help")) && !is_flag_set(NOHELP)) {
+        if (i == 1 && is_help_mode()) {
             if (argc == 3) {
                 print_help(string(argv[2]));
             } else {
                 print_help();
             }
             parse_result = false;
-            help_printed = true;
             return parse_result;
         }
         // go throwgh all expected_args[] elements to find the option by pattern
@@ -740,7 +738,7 @@ bool args_parser::parse() {
             parse_result = false;
         }
     }
-    if (!parse_result && !is_flag_set(SILENT) && !help_printed)
+    if (!parse_result && !is_flag_set(SILENT))
         print_help_advice();
     return parse_result;
 }
@@ -899,6 +897,17 @@ bool args_parser::is_option_defaulted(const std::string &str) const {
     }
     return false;
 }
+
+bool args_parser::is_help_mode() const {
+    if (!argv || argc < 2)
+        return false;
+    // help is hardcoded as and optional 1st arg
+    if (match(argv[1], std::string("help")) && !is_flag_set(NOHELP)) {
+        return true;
+    }
+    return false;
+}
+
 
 ostream &operator<<(ostream &s, const args_parser::option &opt) {
     opt.to_ostream(s);
