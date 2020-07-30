@@ -136,6 +136,7 @@ const string args_parser::value::get_type_str(arg_t _type) {
 }
 
 #ifdef WITH_YAML_CPP
+enum yaml_error_t { NOT_SEQUENCE, NOT_MAP, INVALID_SIZE };
 YAML::Emitter &operator<< (YAML::Emitter& out, const args_parser::value &v) {
     if (v.is_initialized()) {
         switch(v.type) {
@@ -176,13 +177,19 @@ void args_parser::option_scalar::from_yaml(const YAML::Node& node) { val.type = 
 void args_parser::option_vector::to_yaml(YAML::Emitter& out) const { out << YAML::Flow << val; }
 void args_parser::option_vector::from_yaml(const YAML::Node& node) 
 {
-    assert(node.IsSequence());
-    val.resize(node.size());
-    for (size_t i = 0; i < val.size(); i++) {
+    if (!node.IsSequence()) {
+        throw yaml_error_t::NOT_SEQUENCE;
+    }
+    if (val.size() == 0) {
+        val.resize(node.size());
+    }
+    if (node.size() < (size_t)vec_min || node.size() > (size_t)vec_max) {
+        throw yaml_error_t::INVALID_SIZE;
+    }
+    for (size_t i = 0; i < node.size(); i++) {
         val[i].type = type;
         node[i] >> val[i];
     }
-    assert(val.size() >= (size_t)vec_min && val.size() <= (size_t)vec_max);
 }
 
 void args_parser::option_map::to_yaml(YAML::Emitter& out) const { 
@@ -192,9 +199,12 @@ void args_parser::option_map::to_yaml(YAML::Emitter& out) const {
     }
     out << YAML::EndMap;
 }
+
 void args_parser::option_map::from_yaml(const YAML::Node& node) 
 {
-    assert(node.IsMap());
+    if (!node.IsMap()) {
+        throw yaml_error_t::NOT_MAP;
+    }
     for (auto it = node.begin(); it != node.end(); ++it) {
         std::string key, value;
         key = it->first.as<std::string>();
@@ -791,15 +801,17 @@ void args_parser::get_unknown_args(vector<string> &r) const {
 
 #ifdef WITH_YAML_CPP
 bool args_parser::load(istream &in_stream) {
+    const string *pgroup;
+    std::shared_ptr<option> *popt;
     try {
         YAML::Node stream = YAML::Load(in_stream);
 
         // loop through all in expected_args[] to find each option in file
-        const string *pgroup;
-        std::shared_ptr<option> *popt;
         in_expected_args(FOREACH_FIRST, pgroup, popt);
         while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
             if (*pgroup == "SYS" || *pgroup == "EXTRA_ARGS")
+                continue;
+            if (!(*popt)->defaulted)
                 continue;
             if(stream[(*popt)->str.c_str()]) {
                 const YAML::Node Name = stream[(*popt)->str.c_str()].as<YAML::Node>();
@@ -818,6 +830,24 @@ bool args_parser::load(istream &in_stream) {
                 *it >> **popt;
             }
         }
+    }
+    catch (const yaml_error_t &err) {
+        std::string s = "(?)";
+        if (popt) {
+            s = (*popt)->str;
+        }
+        switch (err) {
+            case yaml_error_t::NOT_MAP:  
+                sout << "ERROR: input YAML file parsing error on option: " << s << ": map is expected" << endl;
+                break;
+            case yaml_error_t::NOT_SEQUENCE:
+                sout << "ERROR: input YAML file parsing error on option: " << s << ": sequence is expected" << endl;
+                break;
+            case yaml_error_t::INVALID_SIZE:
+                sout << "ERROR: input YAML file parsing error on option: " << s << ": wrong sequence size" << endl;
+                break;
+        }
+        return false;
     }
     catch (const YAML::Exception& e) {
         sout << "ERROR: input YAML file parsing error: " << e.what() << endl;
