@@ -299,8 +299,13 @@ bool args_parser::option_map::do_parse(const char *const_sval) {
         std::vector<std::string> kv;
         str_split(v.str, '=', kv);
         if (kv.size() != 2)
-            return false;;
-        kvmap[kv[0]] = kv[1];
+            return false;
+        if (kvmap.find(kv[0]) == kvmap.end()) {
+            kvmap[kv[0]] = kv[1];
+        } else {
+            auto oldval = kvmap[kv[0]];
+            kvmap[kv[0]] = oldval + ";" + kv[1];
+        }
     }
     return true;
 }
