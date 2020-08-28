@@ -221,6 +221,7 @@ class args_parser {
         enum { MAX_VEC_SIZE = 1024 };
         char vec_delimiter;
         int num_already_initialized_elems;
+        bool map_always_override = false;
         std::vector<args_parser::value> val;
         std::string vec_def;
         std::map<std::string, std::string> kvmap;

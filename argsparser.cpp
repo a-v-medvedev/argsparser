@@ -300,7 +300,7 @@ bool args_parser::option_map::do_parse(const char *const_sval) {
         str_split(v.str, '=', kv);
         if (kv.size() != 2)
             return false;
-        if (kvmap.find(kv[0]) == kvmap.end()) {
+        if (kvmap.find(kv[0]) == kvmap.end() || map_always_override) {
             kvmap[kv[0]] = kv[1];
         } else {
             auto oldval = kvmap[kv[0]];
@@ -314,6 +314,7 @@ void args_parser::option_map::set_default_value() {
     if (num_already_initialized_elems == 0) {
         do_parse(vec_def.c_str());
         defaulted = true;
+        map_always_override = true;
         num_already_initialized_elems = 0;
     }
 }
