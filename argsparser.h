@@ -1,8 +1,9 @@
 /*
- * Copyright (c) 2018-2019 Alexey V. Medvedev
- * This code is an extension of the parts of Intel MPI benchmarks project.
+ * Copyright (c) 2018-2020 Alexey V. Medvedev
+ * This code is an extension of the parts of Intel(R) MPI Benchmarks project.
  * It keeps the same Community Source License (CPL) license.
  */
+
 /*****************************************************************************
  *                                                                           *
  * Copyright (c) 2016-2018 Intel Corporation.                                *
@@ -11,15 +12,9 @@
  *****************************************************************************
 
 This code is covered by the Community Source License (CPL), version
-1.0 as published by IBM and reproduced in the file "license.txt" in the
-"license" subdirectory. Redistribution in source and binary form, with
-or without modification, is permitted ONLY within the regulations
-contained in above mentioned license.
-
-Use of the name and trademark "Intel(R) MPI Benchmarks" is allowed ONLY
-within the regulations of the "License for Use of "Intel(R) MPI
-Benchmarks" Name and Trademark" as reproduced in the file
-"use-of-trademark-license.txt" in the "license" subdirectory.
+1.0 as published by IBM and reproduced in the file "license.txt"
+Redistribution in source and binary form, with or without modification, 
+is permitted ONLY within the regulations contained in above mentioned license.
 
 THE PROGRAM IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OR
 CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED INCLUDING, WITHOUT
@@ -55,7 +50,7 @@ goods and services.
 #pragma once
 
 // Note: yaml-cpp 0.6.x library binding is implemented.
-// This won't work with earlier versions and will require C++11 compiler.  
+// This doesn't work with earlier versions and requires C++11 compiler.
 #define WITH_YAML_CPP
 
 #include <vector>
@@ -80,6 +75,7 @@ class args_parser {
     std::ostream &sout;
     const static int version;
     std::string program_name;
+    bool parse_done = false;
 
     public:
     args_parser() : argc(0), argv(0), option_starter("--"), option_delimiter('='), sout(std::cout), prev_option(NULL), last_error(NONE) {}
@@ -298,7 +294,7 @@ class args_parser {
     template <typename T>
     option &add_vector(const char *s, const char *defaults, char delim = ',', int min = 0, int max = option_vector::MAX_VEC_SIZE);
     args_parser::option &add_map(const char *s, char delim1 = ':');
-    args_parser::option &add_map(const char *s, const char *def, char delim1 = ':');
+    args_parser::option &add_map(const char *s, const char *def = "", char delim1 = ':');
 
     args_parser &set_current_group(const std::string &g) { current_group = g; return *this; }
     args_parser &set_default_current_group() { current_group = ""; return *this; }

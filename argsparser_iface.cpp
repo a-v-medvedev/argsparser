@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Alexey V. Medvedev
- * This code is an extension of the parts of Intel MPI benchmarks project.
+ * This code is an extension of the parts of Intel(R) MPI Benchmarks project.
  * It keeps the same Community Source License (CPL) license.
  */
 

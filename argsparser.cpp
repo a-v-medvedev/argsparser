@@ -1,8 +1,9 @@
 /*
- * Copyright (c) 2018-2019 Alexey V. Medvedev
- * This code is an extension of the parts of Intel MPI benchmarks project.
+ * Copyright (c) 2018-2020 Alexey V. Medvedev
+ * This code is an extension of the parts of Intel(R) MPI Benchmarks project.
  * It keeps the same Community Source License (CPL) license.
  */
+
 /*****************************************************************************
  *                                                                           *
  * Copyright (c) 2016-2018 Intel Corporation.                                *
@@ -11,15 +12,9 @@
  *****************************************************************************
 
 This code is covered by the Community Source License (CPL), version
-1.0 as published by IBM and reproduced in the file "license.txt" in the
-"license" subdirectory. Redistribution in source and binary form, with
-or without modification, is permitted ONLY within the regulations
-contained in above mentioned license.
-
-Use of the name and trademark "Intel(R) MPI Benchmarks" is allowed ONLY
-within the regulations of the "License for Use of "Intel(R) MPI
-Benchmarks" Name and Trademark" as reproduced in the file
-"use-of-trademark-license.txt" in the "license" subdirectory.
+1.0 as published by IBM and reproduced in the file "license.txt".
+Redistribution in source and binary form, with or without modification, 
+is permitted ONLY within the regulations contained in above mentioned license.
 
 THE PROGRAM IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OR
 CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED INCLUDING, WITHOUT
@@ -175,6 +170,7 @@ void args_parser::option_scalar::to_yaml(YAML::Emitter& out) const { out << val;
 void args_parser::option_scalar::from_yaml(const YAML::Node& node) { val.type = type; node >> val; }
 
 void args_parser::option_vector::to_yaml(YAML::Emitter& out) const { out << YAML::Flow << val; }
+
 void args_parser::option_vector::from_yaml(const YAML::Node& node) 
 {
     if (!node.IsSequence()) {
@@ -295,26 +291,41 @@ bool args_parser::option_map::do_parse(const char *const_sval) {
     if (!res)
         return false;
     num_already_initialized_elems += positions.size();
+    std::map<std::string, std::string> kvmap_local;
     for (auto v : val) {
         std::vector<std::string> kv;
         str_split(v.str, '=', kv);
         if (kv.size() != 2)
             return false;
-        if (kvmap.find(kv[0]) == kvmap.end() || map_always_override) {
-            kvmap[kv[0]] = kv[1];
+        if (kvmap_local.find(kv[0]) == kvmap_local.end()) {
+            kvmap_local[kv[0]] = kv[1];
         } else {
-            auto oldval = kvmap[kv[0]];
-            kvmap[kv[0]] = oldval + ";" + kv[1];
+            auto oldval = kvmap_local[kv[0]];
+            kvmap_local[kv[0]] = oldval + ";" + kv[1];
         }
     }
+    for (auto kv : kvmap_local) {
+        auto key = kv.first;
+        auto value = kv.second;
+		if (kvmap.find(key) == kvmap.end() || map_always_override) {
+			kvmap[key] = value;
+		} else {
+			auto oldval = kvmap[key];
+			kvmap_local[key] = oldval + ";" + value;
+		}
+    }
+	map_always_override = false;
     return true;
 }
 
 void args_parser::option_map::set_default_value() {
     if (num_already_initialized_elems == 0) {
-        do_parse(vec_def.c_str());
+        if (vec_def != "") {
+            map_always_override = true;
+            do_parse(vec_def.c_str());
+            map_always_override = true;
+        }
         defaulted = true;
-        map_always_override = true;
         num_already_initialized_elems = 0;
     }
 }
@@ -662,8 +673,11 @@ bool args_parser::parse() {
         }
         // help is hardcoded as and optional 1st arg
         if (i == 1 && is_help_mode()) {
-            if (argc == 3) {
+            if (argc == 3 && option_delimiter == ' ') {
                 print_help(string(argv[2]));
+            } else if (argc == 2 && arg.find(option_delimiter) != string::npos) {
+                std::string a(arg.begin() + arg.find(option_delimiter) + 1, arg.end());
+                print_help(a);
             } else {
                 print_help();
             }
@@ -756,6 +770,7 @@ bool args_parser::parse() {
     }
     if (!parse_result && !is_flag_set(SILENT))
         print_help_advice();
+    parse_done = true;
     return parse_result;
 }
 
@@ -817,7 +832,7 @@ bool args_parser::load(istream &in_stream) {
         while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
             if (*pgroup == "SYS" || *pgroup == "EXTRA_ARGS")
                 continue;
-            if (!(*popt)->defaulted)
+            if (parse_done && !(*popt)->defaulted)
                 continue;
             if(stream[(*popt)->str.c_str()]) {
                 const YAML::Node Name = stream[(*popt)->str.c_str()].as<YAML::Node>();
