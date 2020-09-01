@@ -64,8 +64,6 @@ goods and services.
 #include <functional>
 #include <numeric>
 
-using namespace std;
-
 //-- UNIT TESTS ----------------------------------------------------------------------------------
 
     // Current coverage: 79.3% argsparser.cpp, 82.1% argsparser.h
@@ -88,6 +86,7 @@ using namespace std;
     // TODO get_command_line(), is_option(), is_option_defaulted(), print()
     // TODO various combinations of different options in the same cmdline, check options with similar names
     // TODO all error cases
+
 //------------------------------------------------------------------------------------------------
 
 void check_parser();
@@ -110,8 +109,8 @@ void print_args(int nargs, const char * const *argv) {
 struct CheckParser {
     bool result;
     bool except;
-    shared_ptr<args_parser> pparser;
-    ostringstream streamout;
+    std::shared_ptr<args_parser> pparser;
+    std::ostringstream streamout;
     std::string strexception;
     CheckParser() : result(false), except(false) {}
     args_parser &parser() { return *pparser; }
@@ -129,7 +128,7 @@ struct CheckParser {
         try {
             result = pparser->parse();
         }
-        catch(exception &ex) {
+        catch(std::exception &ex) {
             strexception = ex.what();
             std::cout << "EXCEPTION: " << ex.what() << std::endl;
             except = true;
@@ -141,7 +140,7 @@ struct CheckParser {
             dumped = pparser->dump();
             return *pparser;
         }
-        catch(exception &ex) {
+        catch(std::exception &ex) {
             strexception = ex.what();
             std::cout << "EXCEPTION: " << ex.what() << std::endl;
             except = true;
@@ -153,7 +152,7 @@ struct CheckParser {
             result = pparser->load(dumped);
             return *pparser;
         }
-        catch(exception &ex) {
+        catch(std::exception &ex) {
             strexception = ex.what();
             std::cout << "EXCEPTION: " << ex.what() << std::endl;
             except = true;
@@ -177,7 +176,7 @@ enum delimiter_t { RAW, WITH_SPACE, WITH_EQUAL, WITH_SLASH };
 template <typename T> 
 void val2str(T val, std::string &str)
 {
-    ostringstream os;
+    std::ostringstream os;
     os << val;
     str = os.str();
 }
@@ -189,7 +188,7 @@ void val2str<bool>(bool val, std::string &str)
 }
 
 template <typename T> 
-void vals2str(vector<T> vals, std::string delim, std::string &str)
+void vals2str(std::vector<T> vals, std::string delim, std::string &str)
 {
     for (size_t i = 0; i < vals.size(); i++) {
         std::string tmp;
@@ -256,7 +255,7 @@ template <typename T>
 int make_keyvalue_arg_vector(const char *(&argv)[1024], std::string opt, delimiter_t mode, T val1, T val2)
 {
     std::string sval;
-    vector<T> vals;
+    std::vector<T> vals;
     vals.push_back(val1);
     vals.push_back(val2);
     vals2str<T>(vals, ",", sval);
@@ -301,7 +300,7 @@ void basic_vector_check(T val1, T val2) {
             int nargs = make_keyvalue_arg_vector<T>(argv, "aaa", mode, val1, val2);
             CheckParser p;
             p.init(nargs, (char **)argv, mode).add_vector<T>("aaa", ',').set_caption("bbb");
-            vector<T> result;
+            std::vector<T> result;
             switch (dump_load_or_parse) {
                 case PARSE: p.run().get<T>("aaa", result); break;
                 case DUMP: p.run(); p.dump(dumped).get<T>("aaa", result); break;
@@ -345,7 +344,7 @@ void default_vector_check(const char *def, size_t n) {
     	    nargs += make_arg<std::string>(nargs, argv, "check", delimiter_t::RAW);
         	CheckParser p;
 	        p.init(nargs, (char **)argv, mode).add_vector<T>("aaa", def).set_caption("bbb");
-    	    vector<T> result;
+            std::vector<T> result;
             switch (dump_load_or_parse) {
                 case PARSE: p.run().get<T>("aaa", result); break;
                 case DUMP: p.run(); p.dump(dumped).get<T>("aaa", result); break;
@@ -368,7 +367,7 @@ void default_vector_check_ext(const char *def, const char *sval, size_t n, T val
 			nargs += make_args<std::string>(nargs, argv, "aaa", sval, mode);
 			CheckParser p;
 			p.init(nargs, (char **)argv, mode).add_vector<T>("aaa", def).set_caption("bbb");
-			vector<T> result;
+            std::vector<T> result;
             switch (dump_load_or_parse) {
                 case PARSE: p.run().get<T>("aaa", result); break;
                 case DUMP: p.run(); p.dump(dumped).get<T>("aaa", result); break;
