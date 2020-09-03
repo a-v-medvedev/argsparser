@@ -17,10 +17,10 @@ all: $(TARGETS)
 params_utest: params_utest.o
 	$(CXX) params_utest.o -o params_utest $(LDFLAGS) $(LIBS)
 
-params_utest.cpp: $(PARAMS_DIR)/params.h $(PARAMS_DIR)/params_override.h $(PARAMS_DIR)/dict.inl $(PARAMS_DIR)/list.inl $(PARAMS_DIR)/override.inl $(PARAMS_DIR)/value.inl
+params_utest.o: $(PARAMS_DIR)/params.h $(PARAMS_DIR)/params_override.h $(PARAMS_DIR)/dict.inl $(PARAMS_DIR)/list.inl $(PARAMS_DIR)/override.inl $(PARAMS_DIR)/value.inl $(PARAMS_DIR)/params.inl
 
-params_utest.o: params_utest.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $^
+.cpp.o:
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:
 	rm -f params_utest params_utest.o

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 struct utest_params_details {
 	using my_dictionary = params::dictionary<utest_params_details>;
 	using my_list = params::list<utest_params_details>;
@@ -7,6 +9,10 @@ struct utest_params_details {
     static std::string get_family_key() { return "family"; }
     static std::string get_layer_prefix() { return "lev"; }
 	static uint16_t get_nlayers() { return 100; }
+
+    static void print_stream(const std::stringstream &ss) {
+        std::cout << ss.str();
+    }
 
     static void print_table(const my_dictionary &params) {
 	    my_list::print_line_delimiter();

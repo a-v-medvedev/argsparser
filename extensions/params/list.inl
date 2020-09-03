@@ -275,22 +275,28 @@ void list<details>::print_line(const std::string &key, const std::string &out) c
     std::string str_key = (out == "" ? key : out);
     std::string str_value = "[UNDEFIDNED]";
     get_value_as_string(key, str_value);
-    std::cout << std::setfill(' ') << "| " << std::left
-              << std::setw(26) << str_key << " | " << std::right << std::setw(15)
-              << str_value << " |" << std::endl;
+    std::stringstream ss;
+    ss << std::setfill(' ') << "| " << std::left
+       << std::setw(26) << str_key << " | " << std::right << std::setw(15)
+       << str_value << " |" << std::endl;
+    details::print_stream(ss);
 }
 
 template <class details>
 void list<details>::print_header(const std::string str, uint16_t offset) {
-    std::cout << std::setfill(' ') << std::left << "| "
-              << std::setw(offset) << "" << std::setw(44-offset) << str << " |"
-              << std::endl;
+    std::stringstream ss;
+    ss << std::setfill(' ') << std::left << "| "
+       << std::setw(offset) << "" << std::setw(44-offset) << str << " |"
+       << std::endl;
+    details::print_stream(ss);
 }
 
 template <class details>
 void list<details>::print_line_delimiter() {
-    std::cout << std::right << std::setfill('-') << "|" 
-              << std::setw(47) << "|" << std::endl;
+    std::stringstream ss;
+    ss << std::right << std::setfill('-') << "|" 
+       << std::setw(47) << "|" << std::endl;
+    details::print_stream(ss);
 }
 
 template <class details>
