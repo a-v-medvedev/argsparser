@@ -1,9 +1,10 @@
 # params unit tests
 
-BASEPATH = ..
+BASEPATH = ../..
+PARAMS_DIR = $(BASEPATH)/extensions/params
 TARGETS = params_utest
 
-INCLUDES += -I$(BASEPATH) -I$(BASEPATH)/param
+INCLUDES += -I$(BASEPATH) -I$(PARAMS_DIR)
 LIBS += -L$(BASEPATH) -largsparser -Wl,-rpath=$(BASEPATH)
 
 INCLUDES += -I$(BASEPATH)/yaml-cpp/include
@@ -16,7 +17,7 @@ all: $(TARGETS)
 params_utest: params_utest.o
 	$(CXX) params_utest.o -o params_utest $(LDFLAGS) $(LIBS)
 
-#params_utest.o: $(BASEPATH)/param/params.h $(BASEPATH)/param/params_override.h $(BASEPATH)/param/dict.inl $(BASEPATH)/param/list.inl $(BASEPATH)/param/override.inl $(BASEPATH)/param/value.inl
+params_utest.cpp: $(PARAMS_DIR)/params.h $(PARAMS_DIR)/params_override.h $(PARAMS_DIR)/dict.inl $(PARAMS_DIR)/list.inl $(PARAMS_DIR)/override.inl $(PARAMS_DIR)/value.inl
 
 params_utest.o: params_utest.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $^

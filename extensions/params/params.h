@@ -74,7 +74,7 @@ public:
     bool get_value(const std::string &key, T &value) const;
     template<typename T>
     T get_value(const std::string &key) const;
-    bool is_value_set(const std::string &key) const;
+        bool is_value_set(const std::string &key) const;
     std::string get_value_as_string(const std::string &key) const;
     bool get_value_as_string(const std::string &key, std::string &result) const;
     template<typename T>
@@ -127,20 +127,20 @@ struct dictionary {
     list<details> &get_if(const std::vector<std::pair<std::string, T>> &conditions);
     list<details> &get(const std::string &name);
     const list<details> &get(const std::string &name) const;
-    list<details> get(const std::string &name, int level) const;
+        list<details> get(const std::string &name, int layer) const;
     template<typename T>
     void change_value(const std::string &list_name, const std::string &key, const T &value);
     template<typename T>
-    void change_value_lev(const std::string &list_name, const std::string &key, const T &value, uint16_t level);
+    void change_value_onlayer(const std::string &list_name, const std::string &key, const T &value, uint16_t layer);
     template<typename T>
     void forced_change_value(const std::string &list_name, const std::string &key, const T &value);
     template<typename T>
-    void forced_change_value_lev(const std::string &list_name, const std::string &key, const T &value, 
-                                 uint16_t level);
+    void forced_change_value_onlayer(const std::string &list_name, const std::string &key, const T &value, 
+                                     uint16_t layer);
     protected:    
     template<typename T>
-    void internal_change_value_lev(const std::string &list_name, const std::string &key, 
-                                   const T &value, uint16_t level, bool forced);
+    void internal_change_value_onlayer(const std::string &list_name, const std::string &key, 
+                                       const T &value, uint16_t layer, bool forced);
     
     public:
     void print() const;

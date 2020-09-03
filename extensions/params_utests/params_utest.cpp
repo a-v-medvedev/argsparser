@@ -20,13 +20,13 @@ static inline bool parse_params(const std::map<std::string, std::string> kvmap, 
     return true;
 }
 
-utest_list get_list_for_level(const utest_dictionary &global, 
-        const std::string &base, const std::string &overrides, uint16_t levels, uint16_t level) {
-    utest_overrides_holder holder(levels);
+utest_list get_list_for_layer(const utest_dictionary &global, 
+        const std::string &base, const std::string &overrides, uint16_t layers, uint16_t layer) {
+    utest_overrides_holder holder(layers);
     holder.fill_in(global.get(overrides));
     utest_list list = global.get(base);
-    if (holder.find(level)) {
-        auto &overrides = holder.get(level);
+    if (holder.find(layer)) {
+        auto &overrides = holder.get(layer);
         list.override_params(overrides);
     }
     return list;
@@ -61,7 +61,7 @@ void testsuite_0(int argc, char **argv)
     global.set_defaults();
     global.print();
     for (int i = 0; i < 10; i++) {
-        auto list = get_list_for_level(global, "foo", "foo_override", 10, i);
+        auto list = get_list_for_layer(global, "foo", "foo_override", 10, i);
         std::cout << "------- Level: " << i << std::endl;
         list.print();
     }
@@ -173,7 +173,7 @@ void testsuite_9(int argc, char **argv)
     params.add_override("baz", {});
     params.set_defaults();
 	for (int level = 2; level < 5; level++) {
-		params.change_value_lev<uint16_t>("qux", "ddd", 5555, level);
+		params.change_value_onlayer<uint16_t>("qux", "ddd", 5555, level);
 	}
 	auto on_3rd_level = params.get("baz", 3);
     if (on_3rd_level.is_value_set("ddd")) {

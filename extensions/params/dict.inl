@@ -128,16 +128,16 @@ const list<details> &dictionary<details>::get(const std::string &name) const {
 }
 
 template <class details>
-list<details> dictionary<details>::get(const std::string &name, int level) const {
-    const auto &nlevels = details::get_nlevels();
+list<details> dictionary<details>::get(const std::string &name, int layer) const {
+    const auto &nlayers = details::get_nlayers();
     if (!find(name + "_override")) {
         return get(name);
     }
-    overrides_holder<details> holder(nlevels);
+    overrides_holder<details> holder(nlayers);
     holder.fill_in(get(name + "_override"));
     list<details> l = get(name);
-    if (holder.find(level)) {
-        auto &overrides = holder.get(level);
+    if (holder.find(layer)) {
+        auto &overrides = holder.get(layer);
         l.override_params(overrides);
     }
     return l;
@@ -160,8 +160,8 @@ void dictionary<details>::forced_change_value(const std::string &list_name, cons
 
 template <class details>
 template<typename T>
-void dictionary<details>::internal_change_value_lev(const std::string &list_name, const std::string &key, 
-                                           const T &v, uint16_t level, bool forced) {
+void dictionary<details>::internal_change_value_onlayer(const std::string &list_name, const std::string &key, 
+                                           const T &v, uint16_t layer, bool forced) {
     const std::string &layer_prefix = details::get_layer_prefix();
     std::string ol = list_name + "_override";
     if (!find(ol)) {
@@ -172,27 +172,27 @@ void dictionary<details>::internal_change_value_lev(const std::string &list_name
     if (target.get_value(key, oldv)) {
         value p;
         p.set<T>(v);
-        auto newv = oldv + ";" + p.as_string() + "@" + layer_prefix + std::to_string(level);
+        auto newv = oldv + ";" + p.as_string() + "@" + layer_prefix + std::to_string(layer);
         target.template change_value<std::string>(key, newv, forced);
     } else {
         value p;
         p.set<T>(v);
-        target.template add_value<std::string>(key, p.as_string() + "@" + layer_prefix + std::to_string(level));
+        target.template add_value<std::string>(key, p.as_string() + "@" + layer_prefix + std::to_string(layer));
     }
 } 
 
 template <class details>
 template<typename T>
-void dictionary<details>::change_value_lev(const std::string &list_name, const std::string &key, 
-                                  const T &v, uint16_t level) {
-    internal_change_value_lev(list_name, key, v, level, false);
+void dictionary<details>::change_value_onlayer(const std::string &list_name, const std::string &key, 
+                                  const T &v, uint16_t layer) {
+    internal_change_value_onlayer(list_name, key, v, layer, false);
 }
 
 template <class details>
 template<typename T>
-void dictionary<details>::forced_change_value_lev(const std::string &list_name, const std::string &key, 
-                                         const T &v, uint16_t level) {
-    internal_change_value_lev(list_name, key, v, level, true);
+void dictionary<details>::forced_change_value_onlayer(const std::string &list_name, const std::string &key, 
+                                         const T &v, uint16_t layer) {
+    internal_change_value_onlayer(list_name, key, v, layer, true);
 }
 
 template <class details>
@@ -211,14 +211,14 @@ void dictionary<details>::print() const {
 template <class details>
 void dictionary<details>::print_list(const std::string &list_name, const std::string &header_name) const {
     const auto &family_key = details::get_family_key();
-    const auto &nlevels = details::get_nlevels();
+    const auto &nlayers = details::get_nlayers();
     const auto &expected_params = details::get_expected_params();
     assert(find(list_name));
     auto &l = get(list_name);
     list<details>::print_line_delimiter();
     list<details>::print_header(header_name);
     list<details>::print_line_delimiter();
-    overrides_holder<details> holder(nlevels);
+    overrides_holder<details> holder(nlayers);
     if (find(list_name + "_override")) {
         holder.fill_in(get(list_name + "_override"));
     }
@@ -244,12 +244,12 @@ void dictionary<details>::print_list(const std::string &list_name, const std::st
         }
         if (match) {
             l.print_line(e.first);
-            for (int lev = 0; lev < nlevels; lev++) {
-                if (holder.find(lev)) {
-                    auto &per_level_list = holder.get(lev);
+            for (int layer = 0; layer < nlayers; layer++) {
+                if (holder.find(layer)) {
+                    auto &per_layer_list = holder.get(layer);
                     std::string ignored;
-                    if (per_level_list.get_value_as_string(e.first, ignored)) {
-                        per_level_list.print_line(e.first, e.first + " (" + layer_prefix + "." + std::to_string(lev) + ")");
+                    if (per_layer_list.get_value_as_string(e.first, ignored)) {
+                        per_layer_list.print_line(e.first, e.first + " (" + layer_prefix + "." + std::to_string(layer) + ")");
                     }
                 }
             }

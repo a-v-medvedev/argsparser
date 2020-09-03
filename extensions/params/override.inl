@@ -18,33 +18,33 @@ static inline std::vector<std::string> str_split(const std::string &s, char deli
 }
 
 template <class details>
-bool overrides_holder<details>::find(size_t level) 
+bool overrides_holder<details>::find(size_t layer) 
 { 
-    return (per_level_lists.find(level) != per_level_lists.end()); 
+    return (per_layer_lists.find(layer) != per_layer_lists.end()); 
 }
 
 template <class details>
-list<details> &overrides_holder<details>::get(size_t level) 
+list<details> &overrides_holder<details>::get(size_t layer) 
 { 
-    assert(find(level)); 
-    return per_level_lists[level]; 
+    assert(find(layer)); 
+    return per_layer_lists[layer]; 
 }
 
 template <class details>
-void overrides_holder<details>::get_start_end_lev(const std::string &s, size_t &start, size_t &end) {
-    // extract start and end level from s 
-    // input form is: levX[-Y], where X is start level, Y is end level
+void overrides_holder<details>::get_start_end_layer(const std::string &s, size_t &start, size_t &end) {
+    // extract start and end layer from s 
+    // input form is: layerX[-Y], where X is start layer, Y is end layer
     const std::string &layer_prefix = details::get_layer_prefix();
-    std::regex lev(layer_prefix);
+    std::regex layer(layer_prefix);
     std::stringstream ss;
-    ss << std::regex_replace(s, lev, "");
+    ss << std::regex_replace(s, layer, "");
     auto bounds = helpers::str_split(ss.str(), '-');
     if (bounds.size() == 1) {
         start = end = std::stoi(bounds[0]);
     } else {
         start = std::stoi(bounds[0]);
         if (bounds[1] == "E" || bounds[1] == "")
-            end = maxlevel;
+            end = nlayers;
         else 
             end = std::stoi(bounds[1]);
     }
@@ -54,9 +54,9 @@ template <class details>
 void overrides_holder<details>::fill_in(const list<details> &in) {
     // for each in "in" ->  { key, val }
     //     split val by @ -> { v0, v1 }
-    //     extract start and end level from v1, check maxlev value for end
-    //     for (lev=start..end)
-    //         lists[lev].add(key, v0)
+    //     extract start and end layer from v1, check maxlayer value for end
+    //     for (layer=start..end)
+    //         lists[layer].add(key, v0)
     for (auto &i : in.get_raw_list()) {
         auto &key = i.first;
         auto &value = i.second.template get<std::string>();
@@ -65,12 +65,12 @@ void overrides_holder<details>::fill_in(const list<details> &in) {
             auto v = helpers::str_split(part, '@');
             assert(v.size() == 2);
             size_t start, end;
-            get_start_end_lev(v[1], start, end);
-            end = std::min(end, maxlevel);
-            start = std::min(start, maxlevel);
+            get_start_end_layer(v[1], start, end);
+            end = std::min(end, nlayers);
+            start = std::min(start, nlayers);
             assert(start <= end);
-            for (size_t lev = start; lev <= end; lev++) {
-                per_level_lists[lev].parse_and_set_value(key, v[0]);
+            for (size_t layer = start; layer <= end; layer++) {
+                per_layer_lists[layer].parse_and_set_value(key, v[0]);
             }
         }
     }
@@ -78,10 +78,10 @@ void overrides_holder<details>::fill_in(const list<details> &in) {
 
 template <class details>
 template <typename T>
-void overrides_holder<details>::apply_for_each_level(const std::string &param_name, 
+void overrides_holder<details>::apply_for_each_layer(const std::string &param_name, 
                                             std::function<void (T, uint8_t)> f) 
 {
-    for (uint8_t nl = 0; nl < maxlevel; nl++) {
+    for (uint8_t nl = 0; nl < nlayers; nl++) {
         if (find(nl)) {
             auto &over_list = get(nl);
             T value;

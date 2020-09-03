@@ -6,7 +6,7 @@ struct utest_params_details {
     
     static std::string get_family_key() { return "family"; }
     static std::string get_layer_prefix() { return "lev"; }
-	static uint16_t get_nlevels() { return 100; }
+	static uint16_t get_nlayers() { return 100; }
 
     static void print_table(const my_dictionary &params) {
 	    my_list::print_line_delimiter();
