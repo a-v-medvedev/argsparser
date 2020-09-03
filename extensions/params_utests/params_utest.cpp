@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2020 Alexey V. Medvedev
+ * This code is licensed under Community Source License v.1 (CPL v.1) license.
+ * See license.txt file for details.
+ */
+
 #include <iostream>
 #include <map>
 #include <vector>
