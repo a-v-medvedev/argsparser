@@ -279,7 +279,7 @@ void list<details>::print() {
 template <class details>
 void list<details>::print_line(const std::string &key, const std::string &out) const {
     std::string str_key = (out == "" ? key : out);
-    std::string str_value = "[UNDEFIDNED]";
+    std::string str_value = "[UNDEFINED]";
     get_value_as_string(key, str_value);
     std::stringstream ss;
     ss << std::setfill(' ') << "| " << std::left
