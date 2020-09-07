@@ -30,9 +30,11 @@ $(SHARED_LIB): $(LIBOBJS)
 install: $(STATIC_LIB) $(SHARED_LIB)
 	@mkdir -p argsparser
 	@mkdir -p argsparser/include
+	@mkdir -p argsparser/extensions
 	@cp $(SHARED_LIB) argsparser
 	@cp argsparser_iface.h argsparser/include
 	@cp argsparser.h argsparser/include
+	@cp -r extensions/params argsparser/exteansions
 
 argsparser_utests: argsparser_utests.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ -L. -L$(YAML_DIR)/lib -largsparser -lyaml-cpp
