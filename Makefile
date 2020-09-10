@@ -37,7 +37,7 @@ install: $(STATIC_LIB) $(SHARED_LIB)
 	@cp -r extensions/params argsparser/exteansions
 
 argsparser_utests: argsparser_utests.o
-	$(CXX) $(CXXFLAGS) -o $@ $^ -L. -L$(YAML_DIR)/lib -largsparser -lyaml-cpp
+	$(CXX) $(CXXFLAGS) -o $@ $^ -L. -L$(YAML_DIR)/lib -Wl,-rpath=$(YAML_DIR)/lib -largsparser -lyaml-cpp
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c -o $@ $^
