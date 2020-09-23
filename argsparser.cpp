@@ -174,7 +174,7 @@ void args_parser::option_vector::from_yaml(const YAML::Node& node)
     if (!node.IsSequence()) {
         throw yaml_error_t::NOT_SEQUENCE;
     }
-    if (val.size() == 0) {
+    if (val.size() < node.size()) {
         val.resize(node.size());
     }
     if (node.size() < (size_t)vec_min || node.size() > (size_t)vec_max) {
@@ -292,7 +292,7 @@ bool args_parser::option_map::do_parse(const char *const_sval) {
     std::map<std::string, std::string> kvmap_local;
     for (auto v : val) {
         std::vector<std::string> kv;
-        str_split(v.str, '=', kv);
+        str_split(v.str, kv_delimiter, kv);
         if (kv.size() != 2)
             return false;
         if (kvmap_local.find(kv[0]) == kvmap_local.end()) {
@@ -334,14 +334,14 @@ args_parser::option &args_parser::add_flag(const char *s) {
     return opt;
 }
 
-args_parser::option &args_parser::add_map(const char *s, char delim1) {
-    std::shared_ptr<option> popt = std::make_shared<args_parser::option_map>(*this, s, delim1);
+args_parser::option &args_parser::add_map(const char *s, char delim1, char delim2) {
+    std::shared_ptr<option> popt = std::make_shared<args_parser::option_map>(*this, s, delim1, delim2);
     expected_args[current_group].push_back(popt);
     return *popt.get();
 }
 
-args_parser::option &args_parser::add_map(const char *s, const char *def, char delim1) {
-    std::shared_ptr<option> popt = std::make_shared<args_parser::option_map>(*this, s, def, delim1);
+args_parser::option &args_parser::add_map(const char *s, const char *def, char delim1, char delim2) {
+    std::shared_ptr<option> popt = std::make_shared<args_parser::option_map>(*this, s, def, delim1, delim2);
     expected_args[current_group].push_back(popt);
     return *popt.get();
 }
