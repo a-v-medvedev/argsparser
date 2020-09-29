@@ -34,7 +34,7 @@ install: libs
 	@mkdir -p argsparser
 	@mkdir -p argsparser/include
 	@mkdir -p argsparser/extensions
-	@cp $(SHARED_LIB) argsparser
+	@cp $(SHARED_LIB) $(STATIC_LIB) argsparser
 	@cp argsparser_iface.h argsparser/include
 	@cp argsparser.h argsparser/include
 	@cp -r extensions/params argsparser/extensions
