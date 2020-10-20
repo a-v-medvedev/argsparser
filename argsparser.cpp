@@ -81,6 +81,10 @@ args_parser::value &args_parser::value::operator=(const args_parser::value &othe
     return *this;
 }
 
+args_parser::value::value(const args_parser::value &other) {
+    *this = other;
+}
+
 bool args_parser::value::parse(const char *sval, arg_t _type) {
     type = _type;
     int res = 0;

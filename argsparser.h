@@ -93,14 +93,15 @@ class args_parser {
 
     class value {
         public:
-            value() : initialized(false) {}
+            value() {}
             value(float v) : initialized(true), i(0), str("(none)"), b(false) { type = FLOAT; f = v; }
             value(int v) : initialized(true), f(0), str("(none)"), b(false) { type = INT; i = v; }
             value(bool v) : initialized(true), i(0), f(0), str("(none)") { type = BOOL; b = v; }
             value(std::string v) : initialized(true), i(0), f(0), b(false) { type = STRING; str = v; }
             value(const char *v) : initialized(true), i(0), f(0), b(false) { type = STRING; str.assign(v); }
+            value(const value &other);
         public:
-            bool initialized;
+            bool initialized = false;
             int i;
             float f;
             std::string str;
@@ -159,7 +160,7 @@ class args_parser {
         args_parser::value def;
         args_parser::value val;
         option_scalar(const args_parser &_parser, const std::string _str, arg_t _type) : option(_parser,_str, _type, true) { }
-        option_scalar(const args_parser &_parser, const std::string _str, arg_t _type, value _def) : option(_parser, _str, _type, false), def(_def)
+        option_scalar(const args_parser &_parser, const std::string _str, arg_t _type, const value &_def) : option(_parser, _str, _type, false), def(_def)
         { def.sanity_check(type); }
         virtual ~option_scalar() {}
         virtual void print() const { parser.sout << str << ": " << val << std::endl; }
