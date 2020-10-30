@@ -166,7 +166,8 @@ template <class details>
 template<typename T>
 T list<details>::get_value(const std::string &key) const {
     T val;
-    assert(get_value<T>(key, val) == true);
+    bool r = get_value<T>(key, val);
+    assert(r == true);
     return val;
 }
 
