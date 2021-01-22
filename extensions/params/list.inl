@@ -271,7 +271,12 @@ bool list<details>::erase() {
 }
 
 template <class details>
-void list<details>::print() {
+void list<details>::print(const std::string &header) {
+    if (header != "") {
+        print_line_delimiter();
+        print_header(header);
+        print_line_delimiter();
+    }
     for (auto &i : l) {
         print_line(i.first);
     }
@@ -279,12 +284,15 @@ void list<details>::print() {
 
 template <class details>
 void list<details>::print_line(const std::string &key, const std::string &out) const {
+    const auto &family_key = details::get_family_key();
+    if (key == family_key && key == "-")
+        return;
     std::string str_key = (out == "" ? key : out);
     std::string str_value = "[UNDEFINED]";
     get_value_as_string(key, str_value);
     std::stringstream ss;
     ss << std::setfill(' ') << "| " << std::left
-       << std::setw(26) << str_key << " | " << std::right << std::setw(15)
+       << std::setw(36) << str_key << " | " << std::right << std::setw(25)
        << str_value << " |" << std::endl;
     details::print_stream(ss);
 }
@@ -293,7 +301,7 @@ template <class details>
 void list<details>::print_header(const std::string str, uint16_t offset) {
     std::stringstream ss;
     ss << std::setfill(' ') << std::left << "| "
-       << std::setw(offset) << "" << std::setw(44-offset) << str << " |"
+       << std::setw(offset) << "" << std::setw(64-offset) << str << " |"
        << std::endl;
     details::print_stream(ss);
 }
@@ -302,7 +310,7 @@ template <class details>
 void list<details>::print_line_delimiter() {
     std::stringstream ss;
     ss << std::right << std::setfill('-') << "|" 
-       << std::setw(47) << "|" << std::endl;
+       << std::setw(67) << "|" << std::endl;
     details::print_stream(ss);
 }
 

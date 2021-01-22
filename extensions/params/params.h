@@ -92,7 +92,7 @@ public:
 	bool is_value_allowed(const std::string &key, const value &p);
     const std::map<std::string, value> &get_raw_list() const { return l; }
     bool erase();
-    void print();
+    void print(const std::string &header = "");
 protected:
     void print_line(const std::string &key, const std::string &out = "") const;
 	static void print_header(const std::string str, uint16_t offset = 8);
