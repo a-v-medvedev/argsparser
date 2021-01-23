@@ -23,9 +23,12 @@ struct utest_params_details {
     static void print_table(const my_dictionary &params) {
 	    my_list::print_line_delimiter();
     	my_list::print_header("Unit test for params");
-	    for (auto list_name : std::vector<std::string>({"foo", "bar"})) {
-    	    params.print_list(list_name, list_name);
-	    }
+        auto size = params.size();
+        for (size_t i = 0; i < size; i++) {
+            auto &l = params.get(i);
+            if (!std::regex_search(l, std::regex("_override")))
+                params.print_list(l, l);
+        }
     }
 
 #define ALLFAMILIES {}
@@ -43,6 +46,10 @@ struct utest_params_details {
 			{ "fff", 	{ params::value::S, false, 	{ "yyy", "xxx" }, 	NOMINMAX, 		ALLALLOWED } },
 			{ "hhh", 	{ params::value::I, false, 	{ "!yyy" }, 		{ "1", "3" }, 	ALLALLOWED } },
 			{ "iii", 	{ params::value::I, false, 	ALLFAMILIES, 		NOMINMAX, 		{ "1", "2", "5" } } },
+			{ "ivec", 	{ params::value::IV, true, 	ALLFAMILIES, 		NOMINMAX, 		ALLALLOWED } },
+			{ "fvec", 	{ params::value::FV, true, 	ALLFAMILIES, 		NOMINMAX, 		ALLALLOWED } },
+			{ "svec", 	{ params::value::SV, true, 	ALLFAMILIES, 		NOMINMAX, 		ALLALLOWED } },
+			{ "bvec", 	{ params::value::BV, true, 	ALLFAMILIES, 		NOMINMAX, 		ALLALLOWED } },
 		};
 		return expected_params;
     }

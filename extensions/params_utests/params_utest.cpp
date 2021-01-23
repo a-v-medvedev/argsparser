@@ -19,15 +19,33 @@ using utest_dictionary = params::dictionary<utest_params_details>;
 using utest_list = params::list<utest_params_details>;
 using utest_overrides_holder = params::overrides_holder<utest_params_details>;
 
-static inline bool parse_params(const std::map<std::string, std::string> kvmap, utest_list &list) {
+static inline std::vector<std::string> str_split(const std::string &s, char delimiter)
+{
+   std::vector<std::string> result;
+   std::string token;
+   std::istringstream token_stream(s);
+   while (std::getline(token_stream, token, delimiter)) {
+      result.push_back(token);
+   }
+   return result;
+}
+
+static inline bool parse_params(const std::map<std::string, std::string> kvmap, utest_list &list) 
+{
     for (auto &kv : kvmap) {
-        list.parse_and_set_value(kv.first, kv.second);
+        if (kv.second.find(',') != std::string::npos) {
+            auto vec = str_split(kv.second, ',');
+            list.parse_and_set_value(kv.first, vec);
+        } else {
+            list.parse_and_set_value(kv.first, kv.second);
+        }
     }
     return true;
 }
 
 utest_list get_list_for_layer(const utest_dictionary &global, 
-        const std::string &base, const std::string &overrides, uint16_t layers, uint16_t layer) {
+        const std::string &base, const std::string &overrides, uint16_t layers, uint16_t layer) 
+{
     utest_overrides_holder holder(layers);
     holder.fill_in(global.get(overrides));
     utest_list list = global.get(base);
@@ -63,6 +81,17 @@ void testsuite_0(int argc, char **argv)
             return;
         }
         global.add(list, mlist);
+    }
+    {
+        std::map<std::string, std::string> m {{"family", "xxx"}, {"ivec", "1,2,3,4"}, {"svec", "aaa,bbb,ccc"},
+            {"fvec", "-10.5,2e2,+3e-1,.4"}, {"bvec", "true,false,true"},
+        };
+        utest_list mlist;
+        if (!parse_params(m, mlist)) {
+            std::cerr << "Parse error on vector parameters (vectest list)" << std::endl;
+            return;
+        }
+        global.add("vectest", mlist);
     }
     global.set_defaults();
     global.print();

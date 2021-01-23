@@ -141,7 +141,8 @@ struct dictionary {
     list<details> &get_if(const std::vector<std::pair<std::string, T>> &conditions);
     list<details> &get(const std::string &name);
     const list<details> &get(const std::string &name) const;
-        list<details> get(const std::string &name, int layer) const;
+    const std::string &get(size_t num) const;
+    list<details> get(const std::string &name, int layer) const;
     template<typename T>
     void change_value(const std::string &list_name, const std::string &key, const T &value);
     template<typename T>
@@ -160,6 +161,7 @@ struct dictionary {
     void print() const;
     void set_defaults();
     void print_list(const std::string &list_name, const std::string &header_name) const;
+    size_t size() const;
 };
 
 }

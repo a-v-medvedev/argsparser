@@ -134,6 +134,14 @@ const list<details> &dictionary<details>::get(const std::string &name) const {
 }
 
 template <class details>
+const std::string &dictionary<details>::get(size_t num) const {
+    assert(num < size());
+    auto it = m.begin();
+    std::advance(it, num);
+    return it->first;
+}
+
+template <class details>
 list<details> dictionary<details>::get(const std::string &name, int layer) const {
     const auto &nlayers = details::get_nlayers();
     if (!find(name + "_override")) {
@@ -262,6 +270,11 @@ void dictionary<details>::print_list(const std::string &list_name, const std::st
         }
     }
     list<details>::print_line_delimiter();
+}
+
+template <typename details>
+size_t dictionary<details>::size() const {
+    return m.size();
 }
 
 }

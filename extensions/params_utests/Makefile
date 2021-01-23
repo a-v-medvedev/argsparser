@@ -10,13 +10,13 @@ BASEPATH = ../..
 PARAMS_DIR = $(BASEPATH)/extensions/params
 TARGETS = params_utest
 
-INCLUDES += -I$(BASEPATH) -I$(PARAMS_DIR)
-LIBS += -L$(BASEPATH) -largsparser -Wl,-rpath=$(BASEPATH)
+override INCLUDES += -I$(BASEPATH) -I$(PARAMS_DIR)
+override LIBS += -L$(BASEPATH) -largsparser -Wl,-rpath=$(BASEPATH)
 
-INCLUDES += -I$(BASEPATH)/yaml-cpp/include
-LIBS += -L$(BASEPATH)/yaml-cpp/lib -lyaml-cpp -Wl,-rpath=$(BASEPATH)/yaml-cpp/lib
+override INCLUDES += -I$(BASEPATH)/yaml-cpp/include
+override LIBS += -L$(BASEPATH)/yaml-cpp/lib -lyaml-cpp -Wl,-rpath=$(BASEPATH)/yaml-cpp/lib
 
-CXXFLAGS += -Wall -Wextra -std=c++11 $(INCLUDES)
+override CXXFLAGS += -Wall -Wextra -std=c++11 $(INCLUDES)
 
 all: $(TARGETS)
 
