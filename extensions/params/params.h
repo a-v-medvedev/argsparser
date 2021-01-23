@@ -17,7 +17,7 @@ typedef float float32_t;
 namespace params {
 
 struct value {
-    enum type_t { I, F, S, B, NUL } type = NUL;
+    enum type_t { I, F, S, B, IV, FV, SV, BV, NUL } type = NUL;
     static constexpr auto F_MAX = std::numeric_limits<float32_t>::max();
     static constexpr auto I_MAX = std::numeric_limits<uint16_t>::max();
     template <typename T> type_t get_type() const;
@@ -27,11 +27,16 @@ struct value {
     float32_t f;
     bool b;
     std::string s;
+    std::vector<uint16_t> iv;
+    std::vector<float32_t> fv;
+    std::vector<bool> bv;
+    std::vector<std::string> sv;
     template<typename T> void set(T val);
     template<typename T> T &get();
     template<typename T> const T &get() const;
     template<type_t to> void autoconv();
     void parse_and_set(value::type_t t, const std::string &value);
+    void parse_and_set(value::type_t t, const std::vector<std::string> &vec);
     std::string as_string() const;
 };
 
@@ -62,6 +67,7 @@ protected:
     std::map<std::string, value> l;
 public:
     void parse_and_set_value(const std::string &key, const std::string &value);
+    void parse_and_set_value(const std::string &key, const std::vector<std::string> &vec);
 protected:
     value::type_t get_type(const std::string &key) const;
     void set(const std::string &key, const value &p);
@@ -80,7 +86,7 @@ public:
     bool get_value(const std::string &key, T &value) const;
     template<typename T>
     T get_value(const std::string &key) const;
-        bool is_value_set(const std::string &key) const;
+    bool is_value_set(const std::string &key) const;
     std::string get_value_as_string(const std::string &key) const;
     bool get_value_as_string(const std::string &key, std::string &result) const;
     template<typename T>
@@ -94,6 +100,8 @@ public:
     bool erase();
     void print(const std::string &header = "");
 protected:
+	template <typename T>
+	bool is_allowed_vec(const std::string &key, const value &p);
     void print_line(const std::string &key, const std::string &out = "") const;
 	static void print_header(const std::string str, uint16_t offset = 8);
 	static void print_line_delimiter();

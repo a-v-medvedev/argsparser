@@ -38,6 +38,23 @@ void list<details>::parse_and_set_value(const std::string &key, const std::strin
 }
 
 template <class details>
+void list<details>::parse_and_set_value(const std::string &key, const std::vector<std::string> &vec) {
+    const auto &expected_params = details::get_expected_params();
+    if (is_in_expected_params(key) == expected_params.end()) {
+        assert(0 && "Unknown parameter");
+    }
+    value::type_t t;
+    if (omit_value_coversions_and_checks) {
+        t = value::type_t::S;
+    } else {
+        t = (is_in_expected_params(key)->second).type;
+    }
+    value obj;
+    obj.parse_and_set(t, vec);
+    set(key, obj);
+}
+
+template <class details>
 value::type_t list<details>::get_type(const std::string &key) const {
     auto elem = l.find(key);
     if (elem == l.end())
@@ -251,6 +268,17 @@ bool list<details>::is_value_allowed(const std::string &key, T val) {
 }
 
 template <class details>
+template <typename T>
+bool list<details>::is_allowed_vec(const std::string &key, const value &p) {
+  const auto &v = p.get<std::vector<T>>(); 
+  bool res = true; 
+  for (const auto &x : v) { 
+      res = res && is_value_allowed(key, x); 
+  } 
+  return res;
+}
+
+template <class details>
 bool list<details>::is_value_allowed(const std::string &key, const value &p) {
     auto t = p.type;
     switch (t) {
@@ -259,6 +287,10 @@ bool list<details>::is_value_allowed(const std::string &key, const value &p) {
         case value::B: return true;
         case value::NUL: return false;
         case value::S: return is_value_allowed(key, p.get<std::string>());
+        case value::IV: return is_allowed_vec<uint16_t>(key, p);
+        case value::FV: return is_allowed_vec<float32_t>(key, p);
+        case value::BV: return true;
+        case value::SV: return is_allowed_vec<std::string>(key, p);
     }
     assert(0 && "unknown value type");
     return false;
