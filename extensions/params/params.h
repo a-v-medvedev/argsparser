@@ -70,7 +70,6 @@ public:
     void parse_and_set_value(const std::string &key, const std::vector<std::string> &vec);
 protected:
     value::type_t get_type(const std::string &key) const;
-    void set(const std::string &key, const value &p);
     template<typename T>
     void set_value(const std::string &key, const T &value);
     template<typename T>
@@ -79,6 +78,7 @@ protected:
     template<typename T>
     void change_value(const std::string &key, const T &value, bool forced = false);
 public:
+    void set(const std::string &key, const value &p);
     void override_params(const list<details> &other);
     template<typename T>
     void add_value(const std::string &key, const T &value);
@@ -86,6 +86,17 @@ public:
     bool get_value(const std::string &key, T &value) const;
     template<typename T>
     T get_value(const std::string &key) const;
+
+    uint16_t geti(const std::string &key) const { return get_value<uint16_t>(key); }
+    float32_t getf(const std::string &key) const { return get_value<float32_t>(key); }
+    std::string gets(const std::string &key) const { return get_value<std::string>(key); }
+    bool getb(const std::string &key) const { return get_value<bool>(key); }
+
+    uint16_t get_int(const std::string &key) const { return get_value<uint16_t>(key); }
+    float32_t get_float(const std::string &key) const { return get_value<float32_t>(key); }
+    std::string get_string(const std::string &key) const { return get_value<std::string>(key); }
+    bool get_bool(const std::string &key) const { return get_value<bool>(key); }
+
     bool is_value_set(const std::string &key) const;
     std::string get_value_as_string(const std::string &key) const;
     bool get_value_as_string(const std::string &key, std::string &result) const;
