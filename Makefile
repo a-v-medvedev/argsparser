@@ -30,7 +30,7 @@ $(SHARED_LIB): $(LIBOBJS)
 	$(CXX) -shared -Wl,-soname,$@ -o $@ $^ $(LDFLAGS)
 
 install: libs
-	echo install
+	@echo Doing install
 	@mkdir -p argsparser
 	@mkdir -p argsparser/include
 	@mkdir -p argsparser/extensions
