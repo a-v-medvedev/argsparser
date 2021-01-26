@@ -91,11 +91,19 @@ public:
     float32_t getf(const std::string &key) const { return get_value<float32_t>(key); }
     std::string gets(const std::string &key) const { return get_value<std::string>(key); }
     bool getb(const std::string &key) const { return get_value<bool>(key); }
+    uint16_t getiv(const std::string &key) const { return get_value<std::vector<uint16_t>>(key); }
+    float32_t getfv(const std::string &key) const { return get_value<std::vector<float32_t>>(key); }
+    std::string getsv(const std::string &key) const { return get_value<std::vector<std::string>>(key); }
+    bool getbv(const std::string &key) const { return get_value<std::vector<bool>>(key); }
 
     uint16_t get_int(const std::string &key) const { return get_value<uint16_t>(key); }
     float32_t get_float(const std::string &key) const { return get_value<float32_t>(key); }
     std::string get_string(const std::string &key) const { return get_value<std::string>(key); }
     bool get_bool(const std::string &key) const { return get_value<bool>(key); }
+    uint16_t get_vint(const std::string &key) const { return get_value<std::vector<uint16_t>>(key); }
+    float32_t get_vfloat(const std::string &key) const { return get_value<std::vector<float32_t>>(key); }
+    std::string get_vstring(const std::string &key) const { return get_value<std::vector<std::string>>(key); }
+    bool get_vbool(const std::string &key) const { return get_value<std::vector<bool>>(key); }
 
     bool is_value_set(const std::string &key) const;
     std::string get_value_as_string(const std::string &key) const;
