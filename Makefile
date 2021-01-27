@@ -14,7 +14,7 @@ CFLAGS_OPT ?= -O2
 #CFLAGS_OPT = -O0 -g
 #CFLAGS_OPT = -O0 -g --coverage
 
-all: clean libs install
+all: libs install
 
 libs: $(STATIC_LIB) $(SHARED_LIB)
 
