@@ -136,7 +136,8 @@ std::string value::get_max_possible_value(type_t t) {
 void value::parse_and_set(value::type_t t, const std::string &value) {
     assert(t != value::IV && t != value::FV && t != value::SV && t != value::BV);
 	std::regex unsigned_integer_number("^[0-9]*$", std::regex_constants::ECMAScript);
-	std::regex fp_number("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$", std::regex_constants::ECMAScript);
+	std::regex fp_number("^[+-]?([0-9]+([.][0-9]*)?([eE][+-]?[0-9]+)?|[.][0-9]+([eE][+-]?[0-9]+)?)$", 
+                         std::regex_constants::ECMAScript);
 	if (t == value::I) {
         if (value == "inf") {
             set<uint16_t>(value::get_max_possible_value<uint16_t>());
