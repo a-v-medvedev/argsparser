@@ -134,8 +134,8 @@ class args_parser {
         virtual bool do_parse(const char *sval) = 0;
         virtual bool is_scalar() const = 0;
         virtual void set_default_value() = 0;
-        virtual option &set_caption(const char *cap) { caption.assign(cap); return *this; }
-        virtual option &set_description(const char *descr) { description.assign(descr); return *this; }
+        virtual option &set_caption(const std::string &cap) { caption = cap; return *this; }
+        virtual option &set_description(const std::string &descr) { description = descr; return *this; }
         virtual option &set_mode(mode m) { 
             if (m == APPLY_DEFAULTS_ONLY_WHEN_MISSING) 
                 defaultize_before_parsing = false; 
