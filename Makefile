@@ -18,7 +18,8 @@ all: libs install
 
 libs: $(STATIC_LIB) $(SHARED_LIB)
 
-override CXXFLAGS += -fPIC $(CFLAGS_OPT) -I. -I$(YAML_DIR)/include  -Wall -Wextra -pedantic -std=c++11 
+override CXXFLAGS += -fPIC $(CFLAGS_OPT) -I. -I$(YAML_DIR)/include  -Wall -Wextra -pedantic -std=c++11 -D_GNU_SOURCE
+override LDFLAGS = -L$(YAML_DIR)/lib -lyaml-cpp
 #override LDFLAGS += -lgcov
 
 LIBOBJS = argsparser.o argsparser_iface.o
