@@ -207,7 +207,9 @@ void args_parser::option_map::from_yaml(const YAML::Node& node)
         std::string key, value;
         key = it->first.as<std::string>();
         value = it->second.as<std::string>();
-        kvmap[key] = value;
+        if (kvmap.find(key) == kvmap.end()) {
+            kvmap[key] = value;
+        }
     }
 }
 
