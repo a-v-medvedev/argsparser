@@ -834,7 +834,7 @@ bool args_parser::load(std::istream &in_stream) {
         while(in_expected_args(FOREACH_NEXT, pgroup, popt)) {
             if (*pgroup == "SYS" || *pgroup == "EXTRA_ARGS")
                 continue;
-            if (parse_done && !(*popt)->defaulted)
+            if (parse_done && !((*popt)->defaulted || (*popt)->is_map()))
                 continue;
             if(stream[(*popt)->str.c_str()]) {
                 const YAML::Node Name = stream[(*popt)->str.c_str()].as<YAML::Node>();

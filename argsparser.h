@@ -133,6 +133,7 @@ class args_parser {
         virtual void print() const = 0;
         virtual bool do_parse(const char *sval) = 0;
         virtual bool is_scalar() const = 0;
+        virtual bool is_map() const = 0;
         virtual void set_default_value() = 0;
         virtual option &set_caption(const std::string &cap) { caption = cap; return *this; }
         virtual option &set_description(const std::string &descr) { description = descr; return *this; }
@@ -166,6 +167,7 @@ class args_parser {
         virtual void print() const { parser.sout << str << ": " << val << std::endl; }
         virtual bool do_parse(const char *sval);
         virtual bool is_scalar() const { return true; }
+        virtual bool is_map() const { return false; }
         virtual void to_ostream(std::ostream &s) const { s << val; }
 #ifdef WITH_YAML_CPP        
         virtual void to_yaml(YAML::Emitter& out) const;
@@ -203,6 +205,7 @@ class args_parser {
         }
         virtual bool do_parse(const char *sval);
         virtual bool is_scalar() const { return false; }
+        virtual bool is_map() const { return false; }
         virtual void to_ostream(std::ostream &s) const { for (size_t i = 0; i < val.size(); i++) { s << val[i]; if (i != val.size()) s << ", "; } }
 #ifdef WITH_YAML_CPP        
         virtual void to_yaml(YAML::Emitter& out) const;
@@ -239,6 +242,7 @@ class args_parser {
         }
         virtual bool do_parse(const char *sval);
         virtual bool is_scalar() const { return false; }
+        virtual bool is_map() const { return true; }
         virtual void to_ostream(std::ostream &s) const { for (size_t i = 0; i < val.size(); i++) { s << val[i]; if (i != val.size()) s << ", "; } }
 #ifdef WITH_YAML_CPP        
         virtual void to_yaml(YAML::Emitter& out) const;
