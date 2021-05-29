@@ -175,7 +175,7 @@ void testsuite_6(int argc, char **argv)
     utest_list &list = params.get_if<std::string>({{"family", "yyy"}});
     assert(list.is_value_set("aaa"));
     assert(list.get_value_as_string("aaa") == "50");
-    assert(list.get_value<uint16_t>("aaa") == 50);
+    assert(list.get_int("aaa") == 50);
     params.set_defaults();
 }
 

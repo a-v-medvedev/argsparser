@@ -16,6 +16,10 @@ typedef float float32_t;
 
 namespace params {
 
+template <class details> class dictionary;
+template <class details> class list;
+template <class details> class overrides_holder;
+
 struct value {
     enum type_t { I, F, S, B, IV, FV, SV, BV, NUL } type = NUL;
     static constexpr auto F_MAX = std::numeric_limits<float32_t>::max();
@@ -32,12 +36,16 @@ struct value {
     std::vector<bool> bv;
     std::vector<std::string> sv;
     template<typename T> void set(T val);
-    template<typename T> T &get();
-    template<typename T> const T &get() const;
+    
     template<type_t to> void autoconv();
     void parse_and_set(value::type_t t, const std::string &value);
     void parse_and_set(value::type_t t, const std::vector<std::string> &vec);
     std::string as_string() const;
+protected:
+    template<typename T> T &get();
+    template<typename T> const T &get() const;
+    template<typename U> friend class list;
+    template<typename U> friend class overrides_holder;
 };
 
 struct param_traits {
@@ -77,25 +85,15 @@ protected:
     void override_param(const std::string &key, const value &p);
     template<typename T>
     void change_value(const std::string &key, const T &value, bool forced = false);
+    template<typename T>
+    bool get_value(const std::string &key, T &value) const;
+    template<typename T>
+    T get_value(const std::string &key) const;
 public:
     void set(const std::string &key, const value &p);
     void override_params(const list<details> &other);
     template<typename T>
     void add_value(const std::string &key, const T &value);
-    template<typename T>
-    bool get_value(const std::string &key, T &value) const;
-    template<typename T>
-    T get_value(const std::string &key) const;
-
-    uint16_t geti(const std::string &key) const { return get_value<uint16_t>(key); }
-    float32_t getf(const std::string &key) const { return get_value<float32_t>(key); }
-    std::string gets(const std::string &key) const { return get_value<std::string>(key); }
-    bool getb(const std::string &key) const { return get_value<bool>(key); }
-    std::vector<uint16_t> getiv(const std::string &key) const { return get_value<std::vector<uint16_t>>(key); }
-    std::vector<float32_t> getfv(const std::string &key) const { return get_value<std::vector<float32_t>>(key); }
-    std::vector<std::string> getsv(const std::string &key) const { return get_value<std::vector<std::string>>(key); }
-    std::vector<bool> getbv(const std::string &key) const { return get_value<std::vector<bool>>(key); }
-
     uint16_t get_int(const std::string &key) const { return get_value<uint16_t>(key); }
     float32_t get_float(const std::string &key) const { return get_value<float32_t>(key); }
     std::string get_string(const std::string &key) const { return get_value<std::string>(key); }
