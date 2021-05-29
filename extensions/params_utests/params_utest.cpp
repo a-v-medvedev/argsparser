@@ -184,7 +184,7 @@ void testsuite_7(int argc, char **argv)
     (void)argc; (void)argv;
     utest_dictionary params;
     params.set_defaults();
-	params.change_value<float32_t>("baz", "bbb", 1e-12);
+	params.change_value<float64_t>("baz", "bbb", 1e-12);
 	params.forced_change_value<std::string>("baz", "fff", "qwerty");
     params.print();
 }
@@ -195,7 +195,7 @@ void testsuite_8(int argc, char **argv)
     utest_dictionary params;
     params.set_defaults();
 	utest_list over;
-	over.add_value<uint16_t>("aaa", 2);
+	over.add_value<uint32_t>("aaa", 2);
     over.add_value<std::string>("eee", "test2");
 	params.get("baz").override_params(over);
 }
@@ -208,7 +208,7 @@ void testsuite_9(int argc, char **argv)
     params.add_override("baz", {});
     params.set_defaults();
 	for (int level = 2; level < 5; level++) {
-		params.change_value_onlayer<uint16_t>("qux", "ddd", 5555, level);
+		params.change_value_onlayer<uint32_t>("qux", "ddd", 5555, level);
 	}
 	auto on_3rd_level = params.get("baz", 3);
     if (on_3rd_level.is_value_set("ddd")) {
@@ -225,8 +225,8 @@ void testsuite_10(int argc, char **argv)
     params.set_defaults();
 	auto &list = params.get("foo");
 	std::string key, svalue;
-    uint16_t ivalue;
-	if (!list.is_value_allowed<uint16_t>(key="hhh", ivalue=4)) {
+    uint32_t ivalue;
+	if (!list.is_value_allowed<uint32_t>(key="hhh", ivalue=4)) {
 		std::cout << "(key=" << key << " value=" << ivalue << ") Value is not allowed, OK" << std::endl;
 	}
 	if (!list.is_value_allowed<std::string>(key="eee", svalue="sdfsdf")) {

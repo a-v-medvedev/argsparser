@@ -12,7 +12,7 @@
 #include <map>
 #include <assert.h>
 
-typedef float float32_t;
+typedef double float64_t; // FIXME this is actually system-dependent 
 
 namespace params {
 
@@ -22,17 +22,17 @@ template <class details> class overrides_holder;
 
 struct value {
     enum type_t { I, F, S, B, IV, FV, SV, BV, NUL } type = NUL;
-    static constexpr auto F_MAX = std::numeric_limits<float32_t>::max();
-    static constexpr auto I_MAX = std::numeric_limits<uint16_t>::max();
+    static constexpr auto F_MAX = std::numeric_limits<float64_t>::max();
+    static constexpr auto I_MAX = std::numeric_limits<uint32_t>::max();
     template <typename T> type_t get_type() const;
     static std::string get_max_possible_value(type_t);
     template <typename T> T get_max_possible_value();
-    uint16_t i;
-    float32_t f;
+    uint32_t i;
+    float64_t f;
     bool b;
     std::string s;
-    std::vector<uint16_t> iv;
-    std::vector<float32_t> fv;
+    std::vector<uint32_t> iv;
+    std::vector<float64_t> fv;
     std::vector<bool> bv;
     std::vector<std::string> sv;
     template<typename T> void set(T val);
@@ -94,12 +94,12 @@ public:
     void override_params(const list<details> &other);
     template<typename T>
     void add_value(const std::string &key, const T &value);
-    uint16_t get_int(const std::string &key) const { return get_value<uint16_t>(key); }
-    float32_t get_float(const std::string &key) const { return get_value<float32_t>(key); }
+    uint32_t get_int(const std::string &key) const { return get_value<uint32_t>(key); }
+    float64_t get_float(const std::string &key) const { return get_value<float64_t>(key); }
     std::string get_string(const std::string &key) const { return get_value<std::string>(key); }
     bool get_bool(const std::string &key) const { return get_value<bool>(key); }
-    std::vector<uint16_t> get_vint(const std::string &key) const { return get_value<std::vector<uint16_t>>(key); }
-    std::vector<float32_t> get_vfloat(const std::string &key) const { return get_value<std::vector<float32_t>>(key); }
+    std::vector<uint32_t> get_vint(const std::string &key) const { return get_value<std::vector<uint32_t>>(key); }
+    std::vector<float64_t> get_vfloat(const std::string &key) const { return get_value<std::vector<float64_t>>(key); }
     std::vector<std::string> get_vstring(const std::string &key) const { return get_value<std::vector<std::string>>(key); }
     std::vector<bool> get_vbool(const std::string &key) const { return get_value<std::vector<bool>>(key); }
 

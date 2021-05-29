@@ -77,24 +77,24 @@ struct utest_params_details {
 									const std::string &list_name) {
 		(void)list_name;
 		if (family == "xxx") {
-			list.set_value_if_missing<uint16_t>("aaa", 56);
-			list.set_value_if_missing<float32_t>("bbb", 1.234);
+			list.set_value_if_missing<uint32_t>("aaa", 56);
+			list.set_value_if_missing<float64_t>("bbb", 1.234);
 			list.set_value_if_missing<std::string>("fff", "test");
 			list.set_value_if_missing<std::string>("eee", "test2");
-			list.set_value_if_missing<uint16_t>("hhh", 2);
-			list.set_value_if_missing<uint16_t>("iii", 5);
+			list.set_value_if_missing<uint32_t>("hhh", 2);
+			list.set_value_if_missing<uint32_t>("iii", 5);
 		} else if (family == "yyy") {
-			list.set_value_if_missing<uint16_t>("ddd", 777);
-			list.set_value_if_missing<float32_t>("ccc", 4.567);
+			list.set_value_if_missing<uint32_t>("ddd", 777);
+			list.set_value_if_missing<float64_t>("ccc", 4.567);
 			list.set_value_if_missing<std::string>("fff", "test");
 			list.set_value_if_missing<std::string>("eee", "test1");
-			list.set_value_if_missing<uint16_t>("iii", 5);
+			list.set_value_if_missing<uint32_t>("iii", 5);
 		} else if (family == "zzz") {
-			list.set_value_if_missing<uint16_t>("aaa", 56);
-			list.set_value_if_missing<float32_t>("bbb", 1.234);
-			list.set_value_if_missing<uint16_t>("ddd", 777);
-			list.set_value_if_missing<uint16_t>("hhh", 2);
-			list.set_value_if_missing<uint16_t>("iii", 5);
+			list.set_value_if_missing<uint32_t>("aaa", 56);
+			list.set_value_if_missing<float64_t>("bbb", 1.234);
+			list.set_value_if_missing<uint32_t>("ddd", 777);
+			list.set_value_if_missing<uint32_t>("hhh", 2);
+			list.set_value_if_missing<uint32_t>("iii", 5);
 		}
 	}
 };

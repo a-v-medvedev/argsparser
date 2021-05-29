@@ -277,13 +277,13 @@ template <class details>
 bool list<details>::is_value_allowed(const std::string &key, const value &p) {
     auto t = p.type;
     switch (t) {
-        case value::I: return is_value_allowed(key, p.get<uint16_t>());
-        case value::F: return is_value_allowed(key, p.get<float32_t>());
+        case value::I: return is_value_allowed(key, p.get<uint32_t>());
+        case value::F: return is_value_allowed(key, p.get<float64_t>());
         case value::B: return true;
         case value::NUL: return false;
         case value::S: return is_value_allowed(key, p.get<std::string>());
-        case value::IV: return is_allowed_vec<uint16_t>(key, p);
-        case value::FV: return is_allowed_vec<float32_t>(key, p);
+        case value::IV: return is_allowed_vec<uint32_t>(key, p);
+        case value::FV: return is_allowed_vec<float64_t>(key, p);
         case value::BV: return true;
         case value::SV: return is_allowed_vec<std::string>(key, p);
     }
