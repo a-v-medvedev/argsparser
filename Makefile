@@ -4,9 +4,16 @@
 # It keeps the same Community Source License (CPL) license.
 #
 
+UNAME=$(word 1,$(subst -, ,$(shell uname -s)))
+
 SHORT_NAME = argsparser
 STATIC_LIB = lib$(SHORT_NAME).a
+ifeq ($(UNAME),CYGWIN_NT)
+SHARED_LIB = cyg$(SHORT_NAME).dll
+SHARED_LIB_A = lib$(SHORT_NAME).dll.a
+else
 SHARED_LIB = lib$(SHORT_NAME).so
+endif
 
 YAML_DIR ?= yaml-cpp
 
@@ -27,18 +34,26 @@ LIBOBJS = argsparser.o argsparser_iface.o
 $(STATIC_LIB): $(LIBOBJS)
 	ar rcs $@ $^
 
+
+ifeq ($(UNAME),CYGWIN_NT)
+$(SHARED_LIB): $(LIBOBJS)
+	$(CXX) -shared -o $@ -Wl,--out-implib -Wl,$(SHARED_LIB_A) -Wl,--export-all-symbols -Wl,--enable-auto-image-base  $^ $(LDFLAGS)
+else
 $(SHARED_LIB): $(LIBOBJS)
 	$(CXX) -shared -Wl,-soname,$@ -o $@ $^ $(LDFLAGS)
+endif
+
 
 install: libs
-	@echo Doing install
+	@echo Completing $(SHORT_NAME) install:
 	@mkdir -p argsparser
 	@mkdir -p argsparser/include
 	@mkdir -p argsparser/extensions
-	@cp $(SHARED_LIB) $(STATIC_LIB) argsparser
-	@cp argsparser_iface.h argsparser/include
-	@cp argsparser.h argsparser/include
-	@cp -r extensions/params argsparser/extensions
+	@cp -v $(SHARED_LIB) $(STATIC_LIB) argsparser
+	@[ -z "$(SHARED_LIB_A)" ] || cp -v $(SHARED_LIB_A) argsparser
+	@cp -v argsparser_iface.h argsparser/include
+	@cp -v argsparser.h argsparser/include
+	@cp -rv extensions/params argsparser/extensions
 
 argsparser_utests: argsparser_utests.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ -L. -L$(YAML_DIR)/lib -largsparser -lyaml-cpp
