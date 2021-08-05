@@ -170,7 +170,7 @@ bool list<details>::get_value(const std::string &key, T &v) const {
     if (elem == l.end())
         return false;
     else
-        v = elem->second.get<T>();
+        v = elem->second.template get<T>();
     return true;
 }
 
