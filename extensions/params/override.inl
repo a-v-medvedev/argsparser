@@ -32,7 +32,9 @@ bool overrides_holder<details>::find(size_t layer)
 template <class details>
 list<details> &overrides_holder<details>::get(size_t layer) 
 { 
-    assert(find(layer)); 
+    if (!find(layer)) {
+        throw std::runtime_error(std::string("params: overrides_holder: find: not found layer: ") + std::to_string(layer));
+    }
     return per_layer_lists[layer]; 
 }
 
@@ -69,12 +71,16 @@ void overrides_holder<details>::fill_in(const list<details> &in) {
         auto parts = helpers::str_split(value, ';');
         for (const auto &part : parts) {
             auto v = helpers::str_split(part, '@');
-            assert(v.size() == 2);
+            if (v.size() != 2) {
+                throw std::runtime_error(std::string("params: overrides_holder: fill_in: syntax error in part: ") + part);
+            }
             size_t start, end;
             get_start_end_layer(v[1], start, end);
             end = std::min(end, nlayers);
             start = std::min(start, nlayers);
-            assert(start <= end);
+            if (start > end) {
+                throw std::runtime_error(std::string("params: overrides_holder: fill_in: syntax error in part: ") + part);
+            }
             for (size_t layer = start; layer <= end; layer++) {
                 per_layer_lists[layer].parse_and_set_value(key, v[0]);
             }

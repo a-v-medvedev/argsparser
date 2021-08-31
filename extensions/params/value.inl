@@ -22,13 +22,13 @@ template<> void value::autoconv<value::I>() {
     switch (type) {
         case I: break;
         case F: i = (uint32_t)f; type = I; break;
-        case S: assert(0 && "Autoconvertion of a parameter from string requested"); break;
+        case S: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from string requested")); break;
         case B: i = (b ? 1 : 0); break;
         case NUL: break;
-        case IV: assert(0); break;
-        case FV: assert(0); break;
-        case SV: assert(0); break;
-        case BV: assert(0); break;
+        case IV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
+        case FV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
+        case SV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
+        case BV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
         // TODO all vectors
     }
 }
@@ -37,13 +37,13 @@ template<> void value::autoconv<value::F>() {
     switch (type) {
         case I: f = (float64_t)i; type = F; break;
         case F: break;
-        case S: assert(0 && "Autoconvertion of a parameter from string requested"); break;
+        case S: throw std::runtime_error(std::string("params: autoconv<F>: autoconvertion of a parameter from string requested")); break;
         case B: f = (b ? 1.0f : 0.0f); break;
         case NUL: break;
-        case IV: assert(0); break;
-        case FV: assert(0); break;
-        case SV: assert(0); break;
-        case BV: assert(0); break;
+        case IV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
+        case FV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
+        case SV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
+        case BV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
         // TODO all vectors
     }
 }
@@ -134,7 +134,9 @@ std::string value::get_max_possible_value(type_t t) {
 }
 
 void value::parse_and_set(value::type_t t, const std::string &value) {
-    assert(t != value::IV && t != value::FV && t != value::SV && t != value::BV);
+    if (t == value::IV || t == value::FV || t == value::SV || t == value::BV) {
+        throw std::runtime_error(std::string("params: parse_and_set (scalar): this parameter is vector"));
+    }
 	std::regex unsigned_integer_number("^[0-9]*$", std::regex_constants::ECMAScript);
 	std::regex fp_number("^[+-]?([0-9]+([.][0-9]*)?([eE][+-]?[0-9]+)?|[.][0-9]+([eE][+-]?[0-9]+)?)$", 
                          std::regex_constants::ECMAScript);
@@ -144,7 +146,7 @@ void value::parse_and_set(value::type_t t, const std::string &value) {
             return;
         }
 		if (!std::regex_search(value, unsigned_integer_number)) {
-			assert(0 && "Parse error on integer value");
+            throw std::runtime_error("parse_and_set: parse error on integer value");
 		}
 		set<uint32_t>((uint32_t)std::stoi(value));
 	} else if (t == value::F) {
@@ -153,7 +155,7 @@ void value::parse_and_set(value::type_t t, const std::string &value) {
             return;
         }
 		if (!std::regex_search(value, fp_number)) {
-			assert(0 && "Parse error on floating point value");
+            throw std::runtime_error("parse_and_set: parse error on floating point value");
 		}
 		set<float64_t>((float64_t)std::stof(value));
     } else if (t == value::B) {
@@ -166,7 +168,7 @@ void value::parse_and_set(value::type_t t, const std::string &value) {
             value == "0") {
             set<bool>(false);
         } else {
-            assert(0 && "Parse error on bool value");
+            throw std::runtime_error("parse_and_set: parse error on bool value");
         }
 	} else {
 		set<std::string>(value);
@@ -174,7 +176,9 @@ void value::parse_and_set(value::type_t t, const std::string &value) {
 }
 
 void value::parse_and_set(value::type_t t, const std::vector<std::string> &vec) {
-    assert(t == value::IV || t == value::FV || t == value::SV || t == value::BV);
+    if (t != value::IV && t != value::FV && t != value::SV && t != value::BV) {
+        throw std::runtime_error(std::string("params: parse_and_set (vector): this parameter is vector"));
+    }
     if (t == value::IV) {
         value v;
         iv.resize(0);
@@ -203,6 +207,8 @@ void value::parse_and_set(value::type_t t, const std::vector<std::string> &vec) 
             v.parse_and_set(value::B, s);
             bv.push_back(v.b);
         }
+    } else {
+        assert(0 && "unknown type");
     }
     type = t;
 }

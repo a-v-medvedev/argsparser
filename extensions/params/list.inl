@@ -24,7 +24,7 @@ template <class details>
 void list<details>::parse_and_set_value(const std::string &key, const std::string &v) {
     const auto &expected_params = details::get_expected_params();
     if (is_in_expected_params(key) == expected_params.end()) {
-        assert(0 && "Unknown parameter");
+        throw std::runtime_error(std::string("params: parse_and_set_value: unknown parameter: ") + key);
     }
     value::type_t t;
     if (omit_value_coversions_and_checks) {
@@ -41,7 +41,7 @@ template <class details>
 void list<details>::parse_and_set_value(const std::string &key, const std::vector<std::string> &vec) {
     const auto &expected_params = details::get_expected_params();
     if (is_in_expected_params(key) == expected_params.end()) {
-        assert(0 && "Unknown parameter");
+        throw std::runtime_error(std::string("params: parse_and_set_value: unknown parameter: ") + key);
     }
     value::type_t t;
     if (omit_value_coversions_and_checks) {
@@ -67,7 +67,7 @@ template <class details>
 void list<details>::set(const std::string &key, const value &p) {
     const auto &expected_params = details::get_expected_params();
     if (is_in_expected_params(key) == expected_params.end()) {
-        assert(0 && "Unknown parameter");
+        throw std::runtime_error(std::string("params: set: unknown parameter: ") + key);
     }
     auto elem = l.find(key);
     if (elem != l.end())
@@ -81,15 +81,15 @@ template<typename T>
 void list<details>::set_value(const std::string &key, const T &v) {
     const auto &expected_params = details::get_expected_params();
     if (is_in_expected_params(key) == expected_params.end()) {
-        assert(0 && "Unknown parameter");
+        throw std::runtime_error(std::string("params: set_value: unknown parameter: ") + key);
     }
     value obj;
     if (!omit_value_coversions_and_checks) {
         if ((is_in_expected_params(key)->second).type != obj.get_type<T>()) {
-            assert(0 && "Type mismatch on a parameter");
+            throw std::runtime_error(std::string("params: set_value: type mismatch on a parameter: ") + key);
         } 
         if (!is_value_allowed(key, v)) {
-            assert(0 && "Not allowed parameter value");
+            throw std::runtime_error(std::string("params: set_value: not allowed parameter value for key: ") + key);
         }
     }
     obj.set<T>(v);
@@ -105,17 +105,17 @@ template<typename T>
 void list<details>::set_value_if_missing(const std::string &key, const T &v) {
     const auto &expected_params = details::get_expected_params();
     if (is_in_expected_params(key) == expected_params.end()) {
-        assert(0 && "Unknown parameter");
+        throw std::runtime_error(std::string("params: set_value_if_missing: unknown parameter: ") + key);
     }
     auto elem = l.find(key);
     if (elem == l.end()) {
         value obj;
         if (!omit_value_coversions_and_checks) {
             if ((is_in_expected_params(key)->second).type != obj.get_type<T>()) {
-                assert(0 && "Type mismatch on a parameter");
+                throw std::runtime_error(std::string("params: set_value: type mismatch on a parameter: ") + key);
             }
             if (!is_value_allowed(key, v)) {
-                assert(0 && "Not allowed parameter value");
+                throw std::runtime_error(std::string("params: set_value: not allowed value for parameter: ") + key);
             }
         }
         obj.set<T>(v);
@@ -133,11 +133,11 @@ template<typename T>
 void list<details>::change_value(const std::string &key, const T &v, bool forced) {
     const auto &expected_params = details::get_expected_params();
     if (is_in_expected_params(key) == expected_params.end()) {
-        assert(0 && "Unknown parameter");
+        throw std::runtime_error(std::string("params: set_value_if_missing: unknown parameter: ") + key);
     }
     if (!(is_in_expected_params(key)->second).changeable) {
         if (!forced) {
-            assert(0 && "Parameter cannot be changed");
+            throw std::runtime_error(std::string("params: change_value: parameter cannot be changed: ") + key);
         }
     }
     set_value(key, v);
@@ -155,10 +155,10 @@ template<typename T>
 void list<details>::add_value(const std::string &key, const T &v) {
     const auto &expected_params = details::get_expected_params();
     if (is_in_expected_params(key) == expected_params.end()) {
-        assert(0 && "Unknown parameter");
+        throw std::runtime_error(std::string("params: add_value: unknown parameter: ") + key);
     }
     if (l.find(key) != l.end()) {
-        assert(0 && "Parameter is already set");
+        throw std::runtime_error(std::string("params: add_value: parameter is already set: ") + key);
     }
     set_value(key, v);
 }
@@ -179,7 +179,8 @@ template<typename T>
 T list<details>::get_value(const std::string &key) const {
     T val;
     bool r = get_value<T>(key, val);
-    assert(r == true);
+    if (!r)
+        throw std::runtime_error(std::string("params: get_value: unknown parameter or parameter is not set: ") + key);
     return val;
 }
 
@@ -191,7 +192,9 @@ bool list<details>::is_value_set(const std::string &key) const {
 template <class details>
 std::string list<details>::get_value_as_string(const std::string &key) const {
     auto elem = l.find(key);
-    assert(elem != l.end());
+    if (elem == l.end()) {
+        throw std::runtime_error(std::string("params: get_value_as_string: unknown parameter or parameter is not set: ") + key);
+    }
     return elem->second.as_string();
 }
 
@@ -211,7 +214,7 @@ bool list<details>::get_minmax(const std::string &key, std::pair<T, T> &output) 
     const auto &expected_params = details::get_expected_params();
     auto it = is_in_expected_params(key);
     if (it == expected_params.end()) {
-        assert(0 && "Unknown parameter");
+        throw std::runtime_error(std::string("params: get_minmax: unknown parameter: ") + key);
     }
     if ((it->second).minmax.size() != 2)
         return false;
@@ -222,7 +225,7 @@ bool list<details>::get_minmax(const std::string &key, std::pair<T, T> &output) 
     }
     value p1, p2;
     if (p1.get_type<T>() != (it->second).type) {
-        assert(0 && "Type mismatch in min/max values");
+        throw std::runtime_error(std::string("params: get_minmax: type mismatch in min/max values: ") + key);
     }
     p1.parse_and_set((it->second).type, s1); 
     p2.parse_and_set((it->second).type, s2); 
@@ -236,7 +239,7 @@ bool list<details>::get_allowed_values(const std::string &key, std::vector<T> &o
     const auto &expected_params = details::get_expected_params();
     auto it = is_in_expected_params(key);
     if (it == expected_params.end()) {
-        assert(0 && "Unknown parameter");
+        throw std::runtime_error(std::string("params: get_allowed_values: unknown parameter: ") + key);
     }
     if (!(it->second).allowed_values.size())
         return false;
@@ -287,7 +290,7 @@ bool list<details>::is_value_allowed(const std::string &key, const value &p) {
         case value::BV: return true;
         case value::SV: return is_allowed_vec<std::string>(key, p);
     }
-    assert(0 && "unknown value type");
+    throw std::runtime_error(std::string("params: is_value_allowed: unknown value type: ") + key);
     return false;
 }
 

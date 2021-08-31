@@ -83,7 +83,7 @@ const list<details> &dictionary<details>::get_if(const std::vector<std::pair<std
             }
         }
     }
-    assert(false);
+    throw std::runtime_error("params: get_if: list not found for given conditions");
     return *(new list<details>); // never can be reached
 }
 
@@ -103,7 +103,7 @@ list<details> &dictionary<details>::get_if(const std::vector<std::pair<std::stri
             }
         }
     }
-    assert(false);
+    throw std::runtime_error("params: get_if: list not found for given conditions");
     return *(new list<details>); // never can be reached
 }
 
@@ -123,19 +123,25 @@ list<details> &dictionary<details>::get_if(const std::vector<std::pair<std::stri
 
 template <class details>
 list<details> &dictionary<details>::get(const std::string &name) {
-    assert(find(name));
+    if (!find(name)) {
+        throw std::runtime_error(std::string("params: get: list not found: ") + name);
+    }
     return m.find(name)->second;
 }
 
 template <class details>
 const list<details> &dictionary<details>::get(const std::string &name) const {
-    assert(find(name));
+    if (!find(name)) {
+        throw std::runtime_error(std::string("params: get: list not found: ") + name);
+    }
     return m.find(name)->second;
 }
 
 template <class details>
 const std::string &dictionary<details>::get(size_t num) const {
-    assert(num < size());
+    if (num >= size()) {
+        throw std::runtime_error(std::string("params: get: index out of bounds: ") + std::to_string(num));
+    }
     auto it = m.begin();
     std::advance(it, num);
     return it->first;
@@ -227,7 +233,9 @@ void dictionary<details>::print_list(const std::string &list_name, const std::st
     const auto &family_key = details::get_family_key();
     const auto &nlayers = details::get_nlayers();
     const auto &expected_params = details::get_expected_params();
-    assert(find(list_name));
+    if (!find(list_name)) {
+        throw std::runtime_error(std::string("params: print_list: not found list: ") + list_name);
+    }
     auto &l = get(list_name);
     list<details>::print_line_delimiter();
     list<details>::print_header(header_name);
