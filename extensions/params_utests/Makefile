@@ -1,5 +1,5 @@
 # 
-#  Copyright (c) 2020 Alexey V. Medvedev
+#  Copyright (c) 2020-2021 Alexey V. Medvedev
 #  This code is licensed under Community Source License v.1 (CPL v.1) license.
 #  See license.txt file for details.
 # 
