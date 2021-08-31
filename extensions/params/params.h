@@ -119,7 +119,7 @@ public:
 protected:
 	template <typename T>
 	bool is_allowed_vec(const std::string &key, const value &p);
-    void print_line(const std::string &key, const std::string &out = "") const;
+    void print_line(const std::string &key, const std::string &out = "", bool omit_undefined = false) const;
 	static void print_header(const std::string str, uint16_t offset = 8);
 	static void print_line_delimiter();
    
@@ -177,7 +177,7 @@ struct dictionary {
     public:
     void print() const;
     void set_defaults();
-    void print_list(const std::string &list_name, const std::string &header_name) const;
+    void print_list(const std::string &list_name, const std::string &header_name, bool omit_undefined = false) const;
     size_t size() const;
 };
 

@@ -229,7 +229,7 @@ void dictionary<details>::print() const {
 }
 
 template <class details>
-void dictionary<details>::print_list(const std::string &list_name, const std::string &header_name) const {
+void dictionary<details>::print_list(const std::string &list_name, const std::string &header_name, bool omit_undefined) const {
     const auto &family_key = details::get_family_key();
     const auto &nlayers = details::get_nlayers();
     const auto &expected_params = details::get_expected_params();
@@ -265,7 +265,7 @@ void dictionary<details>::print_list(const std::string &list_name, const std::st
             }
         }
         if (match) {
-            l.print_line(e.first);
+            l.print_line(e.first, "", omit_undefined);
             for (int layer = 0; layer < nlayers; layer++) {
                 if (holder.find(layer)) {
                     auto &per_layer_list = holder.get(layer);

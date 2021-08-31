@@ -313,13 +313,15 @@ void list<details>::print(const std::string &header) {
 }
 
 template <class details>
-void list<details>::print_line(const std::string &key, const std::string &out) const {
+void list<details>::print_line(const std::string &key, const std::string &out, bool omit_undefined) const {
     const auto &family_key = details::get_family_key();
     if (key == family_key && key == "-")
         return;
     std::string str_key = (out == "" ? key : out);
     std::string str_value = "[UNDEFINED]";
     get_value_as_string(key, str_value);
+    if (omit_undefined && str_value == "[UNDEFINED]")
+        return;
     std::stringstream ss;
     ss << std::setfill(' ') << "| " << std::left
        << std::setw(36) << str_key << " | " << std::right << std::setw(25)
