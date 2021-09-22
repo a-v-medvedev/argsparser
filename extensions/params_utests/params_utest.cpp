@@ -15,6 +15,8 @@
 
 #include <argsparser.h>
 
+bool utest_params_details::use_debug_print_tables = false;
+
 using utest_dictionary = params::dictionary<utest_params_details>;
 using utest_list = params::list<utest_params_details>;
 using utest_overrides_holder = params::overrides_holder<utest_params_details>;
@@ -186,7 +188,9 @@ void testsuite_7(int argc, char **argv)
     params.set_defaults();
 	params.change_value<float64_t>("baz", "bbb", 1e-12);
 	params.forced_change_value<std::string>("baz", "fff", "qwerty");
+    utest_params_details::use_debug_print_tables = true;
     params.print();
+    utest_params_details::use_debug_print_tables = false;
 }
 
 void testsuite_8(int argc, char **argv)

@@ -229,7 +229,7 @@ void dictionary<details>::print() const {
 }
 
 template <class details>
-void dictionary<details>::print_list(const std::string &list_name, const std::string &header_name = "", bool omit_undefined) const {
+void dictionary<details>::print_list(const std::string &list_name, const std::string &header_name, bool omit_undefined) const {
     const auto &family_key = details::get_family_key();
     const auto &nlayers = details::get_nlayers();
     const auto &expected_params = details::get_expected_params();

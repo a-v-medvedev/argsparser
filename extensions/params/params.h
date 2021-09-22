@@ -11,6 +11,7 @@
 #include <vector>
 #include <map>
 #include <assert.h>
+#include <functional>
 
 typedef double float64_t; // FIXME this is actually system-dependent 
 
@@ -73,6 +74,7 @@ public:
 protected:
     expected_params_t::const_iterator is_in_expected_params(const std::string &key) const;
     std::map<std::string, value> l;
+    std::map<std::string, std::function<std::string(value)>> print_converters;
 public:
     void parse_and_set_value(const std::string &key, const std::string &value);
     void parse_and_set_value(const std::string &key, const std::vector<std::string> &vec);
@@ -116,6 +118,9 @@ public:
     const std::map<std::string, value> &get_raw_list() const { return l; }
     bool erase();
     void print(const std::string &header = "");
+    void add_print_converter(const std::string &key, std::function<std::string(const value &)>);
+    void remove_print_converter(const std::string &key);
+
 protected:
 	template <typename T>
 	bool is_allowed_vec(const std::string &key, const value &p);

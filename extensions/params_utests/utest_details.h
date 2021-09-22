@@ -8,9 +8,21 @@
 
 #include <sstream>
 
+template <typename DETAILS>
+std::string custom_print(const params::value &v) {
+   std::string result = v.as_string();
+   if (DETAILS::use_debug_print_tables) {
+       return "<<<debug_print_tables>>>";
+   } else {
+       return result;
+   }
+}
+
 struct utest_params_details {
 	using my_dictionary = params::dictionary<utest_params_details>;
 	using my_list = params::list<utest_params_details>;
+
+    static bool use_debug_print_tables;
     
     static std::string get_family_key() { return "family"; }
     static std::string get_layer_prefix() { return "lev"; }
@@ -30,6 +42,7 @@ struct utest_params_details {
                 params.print_list(l, l);
         }
     }
+
 
 #define ALLFAMILIES {}
 #define NOMINMAX {}
@@ -96,5 +109,6 @@ struct utest_params_details {
 			list.set_value_if_missing<uint32_t>("hhh", 2);
 			list.set_value_if_missing<uint32_t>("iii", 5);
 		}
+        list.add_print_converter("aaa", custom_print<utest_params_details>);
 	}
 };

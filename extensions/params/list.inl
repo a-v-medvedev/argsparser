@@ -195,6 +195,12 @@ std::string list<details>::get_value_as_string(const std::string &key) const {
     if (elem == l.end()) {
         throw std::runtime_error(std::string("params: get_value_as_string: unknown parameter or parameter is not set: ") + key);
     }
+	auto it = print_converters.find(key);
+	if (it != print_converters.end()) {
+		if (print_converters.at(key)) {
+			return print_converters.at(key)(elem->second);
+		}
+	}
     return elem->second.as_string();
 }
 
@@ -202,6 +208,13 @@ template <class details>
 bool list<details>::get_value_as_string(const std::string &key, std::string &result) const {
     auto elem = l.find(key);
     if (elem != l.end()) {
+        auto it = print_converters.find(key);
+        if (it != print_converters.end()) {
+            if (print_converters.at(key)) {
+                result = print_converters.at(key)(elem->second);
+                return true;
+            }
+        }
         result = elem->second.as_string();
         return true;
     }
@@ -310,6 +323,16 @@ void list<details>::print(const std::string &header) {
     for (auto &i : l) {
         print_line(i.first);
     }
+}
+
+template <class details>
+void list<details>::add_print_converter(const std::string &key, std::function<std::string(const value &)> func) {
+    print_converters[key] = func;
+}
+
+template <class details>
+void list<details>::remove_print_converter(const std::string &key) {
+    print_converters[key] = nullptr;
 }
 
 template <class details>
