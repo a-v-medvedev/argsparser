@@ -229,7 +229,7 @@ void dictionary<details>::print() const {
 }
 
 template <class details>
-void dictionary<details>::print_list(const std::string &list_name, const std::string &header_name, bool omit_undefined) const {
+void dictionary<details>::print_list(const std::string &list_name, const std::string &header_name = "", bool omit_undefined) const {
     const auto &family_key = details::get_family_key();
     const auto &nlayers = details::get_nlayers();
     const auto &expected_params = details::get_expected_params();
@@ -237,8 +237,10 @@ void dictionary<details>::print_list(const std::string &list_name, const std::st
         throw std::runtime_error(std::string("params: print_list: not found list: ") + list_name);
     }
     auto &l = get(list_name);
-    list<details>::print_line_delimiter();
-    list<details>::print_header(header_name);
+    if (header_name.size()) {
+        list<details>::print_line_delimiter();
+        list<details>::print_header(header_name);
+    }
     list<details>::print_line_delimiter();
     overrides_holder<details> holder(nlayers);
     if (find(list_name + "_override")) {
