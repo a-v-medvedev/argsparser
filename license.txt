@@ -1,12 +1,6 @@
 argsparser, as well as Intel(R) MPI Benchmarks, is licensed under the terms
 of the 3-Clause BSD License
 
-   Other third party programs or components provided with IMB-ASYNC
-   may be governed by separate license terms. Information on those
-   components and licenses can be found in the "third-party-programs.txt"
-   file that is included with IMB-ASYNC.
-
-
    The 3-Clause BSD License
 
    Copyright (C) 2016-2018 Intel, Inc. All rights reserved.
