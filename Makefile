@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2018-2021 Alexey V. Medvedev
 # This code is an extension of the parts of Intel(R) MPI Benchmarks project.
-# It keeps the same Community Source License (CPL) license.
+# It keeps the same 3-Clause BSD License.
 #
 
 UNAME=$(word 1,$(subst -, ,$(shell uname -s)))

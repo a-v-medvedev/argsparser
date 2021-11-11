@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2018-2019 Alexey V. Medvedev
  * This code is an extension of the parts of Intel(R) MPI Benchmarks project.
- * It keeps the same Community Source License (CPL) license.
+ * It keeps the same 3-Clause BSD License.
  */
 
 #pragma once

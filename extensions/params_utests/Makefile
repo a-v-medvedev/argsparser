@@ -1,6 +1,6 @@
 # 
 #  Copyright (c) 2020-2021 Alexey V. Medvedev
-#  This code is licensed under Community Source License v.1 (CPL v.1) license.
+#  This code is licensed under 3-Clause BSD License.
 #  See license.txt file for details.
 # 
 
