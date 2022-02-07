@@ -87,10 +87,10 @@ template<> void value::set(uint32_t val) { i = val; type = I; }
 template<> void value::set(float64_t val) { f = val; type = F; }
 template<> void value::set(bool val) { b = val; type = B; }
 template<> void value::set(std::string val) { s = val; type = S; }
-template<> void value::set(std::vector<uint32_t> val) { iv = val; type = I; }
-template<> void value::set(std::vector<float64_t> val) { fv = val; type = F; }
-template<> void value::set(std::vector<bool> val) { bv = val; type = B; }
-template<> void value::set(std::vector<std::string> val) { sv = val; type = S; }
+template<> void value::set(std::vector<uint32_t> val) { iv = val; type = IV; }
+template<> void value::set(std::vector<float64_t> val) { fv = val; type = FV; }
+template<> void value::set(std::vector<bool> val) { bv = val; type = BV; }
+template<> void value::set(std::vector<std::string> val) { sv = val; type = SV; }
 template<> void value::set(value other) { *this = other; }
 
 // scalars
