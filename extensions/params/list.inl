@@ -69,6 +69,11 @@ void list<details>::set(const std::string &key, const value &p) {
     if (is_in_expected_params(key) == expected_params.end()) {
         throw std::runtime_error(std::string("params: set: unknown parameter: ") + key);
     }
+    if (!omit_value_coversions_and_checks) {
+        if (!is_value_allowed(key, p)) {
+            throw std::runtime_error(std::string("params: set_value: not allowed parameter value for key: ") + key);
+        }
+    }
     auto elem = l.find(key);
     if (elem != l.end())
         elem->second = p;
