@@ -342,7 +342,9 @@ void list<details>::remove_print_converter(const std::string &key) {
 
 template <class details>
 void list<details>::print_line(const std::string &key, const std::string &out, bool omit_undefined) const {
+	const auto &expected_params = details::get_expected_params();
     const auto &family_key = details::get_family_key();
+    const auto family_value = get_value_as_string(family_key);
     if (key == family_key && key == "-")
         return;
     std::string str_key = (out == "" ? key : out);
@@ -350,11 +352,37 @@ void list<details>::print_line(const std::string &key, const std::string &out, b
     get_value_as_string(key, str_value);
     if (omit_undefined && str_value == "[UNDEFINED]")
         return;
-    std::stringstream ss;
-    ss << std::setfill(' ') << "| " << std::left
-       << std::setw(36) << str_key << " | " << std::right << std::setw(25)
-       << str_value << " |" << std::endl;
-    details::print_stream(ss);
+     
+	std::vector<std::string> m;
+	for (const auto &e : expected_params) {
+		if (e.first == key)
+			m = e.second.matching_families;
+	}
+
+    //FIXME -- code duplication -- the same logic in dict.inl
+	bool match = true;
+	if (m.size()) {
+		for (auto &family : m) {
+			if (std::regex_match(family, std::regex("^!.*"))) {
+				if (family == "!" + family_value) {
+					match = false;
+					break;
+				}
+			} else if (family == family_value) {
+				match = true;
+				break;
+			} else {
+				match = false;
+			}
+		}
+	}
+	if (match) {
+		std::stringstream ss;
+		ss << std::setfill(' ') << "| " << std::left
+		   << std::setw(36) << str_key << " | " << std::right << std::setw(25)
+		   << str_value << " |" << std::endl;
+		details::print_stream(ss);
+	}
 }
 
 template <class details>
@@ -379,6 +407,29 @@ void list<details>::set_default(const std::string &list_name) {
     const auto &family_key = details::get_family_key();
     if (omit_value_coversions_and_checks)
         return;
+/*  TODO -- add the functionality of checking the match between keys in list and list family 
+    // family_value = get_value_as_string(family_key);
+    // if (family_key != "-") {
+    //     std::vector<std::string> m;
+    // for (&kv : l) {
+        // &key = l.first;
+        // for (const auto &e : expected_params) {
+        //     m = e.second.matching_families;
+        //     if (!m.size())
+        //         continue;
+        //     if (l.find(e.first) != l.end()) {
+        //         // FIXME -- the same code above, join them
+                   // bool match = true;
+                   // for (auto &family : m) {
+                   //    ...(family_value)
+                   // }
+                   // if (!match) {
+                   //    std::runtime_error("Key " + e.first + " not allowed in family " + family_value);
+                   // } 
+        //     }
+        // }
+    // }
+*/
     details::set_family_defaults(*this, get_value<std::string>(family_key), list_name);
 }
 
