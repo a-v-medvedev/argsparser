@@ -17,9 +17,9 @@ typedef double float64_t; // FIXME this is actually system-dependent
 
 namespace params {
 
-template <class details> class dictionary;
+template <class details> struct dictionary;
 template <class details> class list;
-template <class details> class overrides_holder;
+template <class details> struct overrides_holder;
 
 struct value {
     enum type_t { I, F, S, B, IV, FV, SV, BV, NUL } type = NUL;
@@ -46,7 +46,7 @@ protected:
     template<typename T> T &get();
     template<typename T> const T &get() const;
     template<typename U> friend class list;
-    template<typename U> friend class overrides_holder;
+    template<typename U> friend struct overrides_holder;
 };
 
 struct param_traits {
@@ -59,7 +59,7 @@ struct param_traits {
 
 using expected_params_t = std::vector<std::pair<std::string, param_traits>>;
 
-template <class details> class dictionary;
+template <class details> struct dictionary;
                                        
 template <class details>
 class list {
@@ -129,7 +129,7 @@ protected:
 	static void print_line_delimiter();
    
 public:
-    friend class dictionary<details>;
+    friend struct dictionary<details>;
     void set_default(const std::string &list_name);
 };
 
