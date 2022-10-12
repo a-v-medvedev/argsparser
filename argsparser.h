@@ -45,7 +45,7 @@ class args_parser {
 
     public:
     args_parser() : argc(0), argv(0), option_starter("--"), option_delimiter('='), sout(std::cout), prev_option(NULL), last_error(NONE) {}
-    args_parser(int &_argc, char * *&_argv, const char *opt_st = "--", 
+    args_parser(int _argc, const char * const *_argv, const char *opt_st = "--", 
                 char opt_delim = '=', std::ostream &_sout = std::cout) : argc(_argc), argv(_argv), 
                                                                          option_starter(opt_st), 
                                                                          option_delimiter(opt_delim), 
