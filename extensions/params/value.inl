@@ -137,9 +137,6 @@ void value::parse_and_set(value::type_t t, const std::string &value) {
     if (t == value::IV || t == value::FV || t == value::SV || t == value::BV) {
         throw std::runtime_error(std::string("params: parse_and_set (scalar): this parameter is vector"));
     }
-	std::regex unsigned_integer_number("^[0-9]*$", std::regex_constants::ECMAScript);
-	std::regex fp_number("^[+-]?([0-9]+([.][0-9]*)?([eE][+-]?[0-9]+)?|[.][0-9]+([eE][+-]?[0-9]+)?)$", 
-                         std::regex_constants::ECMAScript);
 	if (t == value::I) {
         if (value == "inf") {
             set<uint32_t>(value::get_max_possible_value<uint32_t>());
