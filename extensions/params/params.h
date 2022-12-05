@@ -12,6 +12,7 @@
 #include <map>
 #include <assert.h>
 #include <functional>
+#include <regex>
 
 typedef double float64_t; // FIXME this is actually system-dependent 
 
@@ -25,9 +26,6 @@ struct value {
     enum type_t { I, F, S, B, IV, FV, SV, BV, NUL } type = NUL;
     static constexpr auto F_MAX = std::numeric_limits<float64_t>::max();
     static constexpr auto I_MAX = std::numeric_limits<uint32_t>::max();
-    static const std::regex unsigned_integer_number("^[0-9]*$", std::regex_constants::ECMAScript);
-    static const std::regex fp_number("^[+-]?([0-9]+([.][0-9]*)?([eE][+-]?[0-9]+)?|[.][0-9]+([eE][+-]?[0-9]+)?)$",
-                                      std::regex_constants::ECMAScript);
     template <typename T> type_t get_type() const;
     static std::string get_max_possible_value(type_t);
     template <typename T> T get_max_possible_value();

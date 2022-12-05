@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <chrono>
 
 #include "params.h"
 #include "params.inl"
@@ -201,7 +202,19 @@ void testsuite_8(int argc, char **argv)
 	utest_list over;
 	over.add_value<uint32_t>("aaa", 2);
     over.add_value<std::string>("eee", "test2");
-	params.get("baz").override_params(over);
+    using namespace std::chrono;
+    constexpr size_t N = 10000;
+    constexpr size_t warmup = 10;
+    auto before  = steady_clock::now();
+    for (size_t i = 0; i < N; i++) {
+        if (i == warmup) {
+            before  = steady_clock::now();
+        }
+	    params.get("baz").override_params(over);
+    }
+    auto after = steady_clock::now();
+    double duration = duration_cast<microseconds>(after - before).count();
+    std::cout << ">> USECS per single override_params call: " << duration / (double)(N - warmup) << std::endl;
 }
 
 void testsuite_9(int argc, char **argv)
