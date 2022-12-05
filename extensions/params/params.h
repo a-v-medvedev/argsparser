@@ -80,6 +80,7 @@ public:
     void parse_and_set_value(const std::string &key, const std::vector<std::string> &vec);
 protected:
     value::type_t get_type(const std::string &key) const;
+    void set_unsafe(const std::string &key, const value &p);
     template<typename T>
     void set_value(const std::string &key, const T &value);
     template<typename T>

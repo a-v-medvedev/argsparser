@@ -64,6 +64,15 @@ value::type_t list<details>::get_type(const std::string &key) const {
 }
 
 template <class details>
+void list<details>::set_unsafe(const std::string &key, const value &p) {
+    auto elem = l.find(key);
+    if (elem != l.end())
+        elem->second = p;
+    else
+        l.insert(std::pair<std::string, value>(key, p));
+}
+
+template <class details>
 void list<details>::set(const std::string &key, const value &p) {
     const auto &expected_params = details::get_expected_params();
     if (is_in_expected_params(key) == expected_params.end()) {
@@ -74,11 +83,7 @@ void list<details>::set(const std::string &key, const value &p) {
             throw std::runtime_error(std::string("params: set_value: not allowed parameter value for key: ") + key);
         }
     }
-    auto elem = l.find(key);
-    if (elem != l.end())
-        elem->second = p;
-    else
-        l.insert(std::pair<std::string, value>(key, p));
+    set_unsafe(key, p);
 }
 
 template <class details>
@@ -98,11 +103,7 @@ void list<details>::set_value(const std::string &key, const T &v) {
         }
     }
     obj.set<T>(v);
-    auto elem = l.find(key);
-    if (elem != l.end())
-        elem->second = obj;
-    else
-        l.insert(std::pair<std::string, value>(key, obj));
+    set_unsafe(key, obj);
 }
 
 template <class details>
@@ -130,7 +131,7 @@ void list<details>::set_value_if_missing(const std::string &key, const T &v) {
 
 template <class details>
 void list<details>::override_param(const std::string &key, const value &p) {
-    set(key, p);
+    set_unsafe(key, p); // NOTE: we assume that all value checks are done before
 }
 
 template <class details>
