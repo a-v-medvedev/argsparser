@@ -6,6 +6,11 @@
 
 #pragma once
 
+#ifndef ARGPARSER_PARAMS_TABLEWIDTH
+#define ARGPARSER_PARAMS_TABLEWIDTH 69
+#define ARGPARSER_PARAMS_TABLEWIDTH_1STCOLUMN 36
+#endif
+
 #include <iostream>
 #include <iomanip>
 
@@ -353,7 +358,9 @@ void list<details>::print_line(const std::string &key, const std::string &out, b
         return;
     std::stringstream ss;
     ss << std::setfill(' ') << "| " << std::left
-       << std::setw(36) << str_key << " | " << std::right << std::setw(25)
+       << std::setw(ARGPARSER_PARAMS_TABLEWIDTH_1STCOLUMN) 
+       << str_key << " | " 
+       << std::right << std::setw(ARGPARSER_PARAMS_TABLEWIDTH - ARGPARSER_PARAMS_TABLEWIDTH_1STCOLUMN - 8)
        << str_value << " |" << std::endl;
     details::print_stream(ss);
 }
@@ -362,7 +369,7 @@ template <class details>
 void list<details>::print_header(const std::string str, uint16_t offset) {
     std::stringstream ss;
     ss << std::setfill(' ') << std::left << "| "
-       << std::setw(offset) << "" << std::setw(64-offset) << str << " |"
+       << std::setw(offset) << "" << std::setw(ARGPARSER_PARAMS_TABLEWIDTH - 5 - offset) << str << " |"
        << std::endl;
     details::print_stream(ss);
 }
@@ -371,7 +378,7 @@ template <class details>
 void list<details>::print_line_delimiter() {
     std::stringstream ss;
     ss << std::right << std::setfill('-') << "|" 
-       << std::setw(67) << "|" << std::endl;
+       << std::setw(ARGPARSER_PARAMS_TABLEWIDTH - 2) << "|" << std::endl;
     details::print_stream(ss);
 }
 
