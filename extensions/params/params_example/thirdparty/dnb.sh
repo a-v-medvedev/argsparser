@@ -2,6 +2,9 @@
 
 set -eu
 
+export DNB_NOCCOMP=1
+export DNB_NOCUDA=1
+
 [ -f ../env.sh ] && source ../env.sh || echo "WARNING: no environment file ../env.sh!"
 
 BSCRIPTSDIR=./dbscripts
