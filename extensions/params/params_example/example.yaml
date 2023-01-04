@@ -1,11 +1,14 @@
 ---
-example_dictionary:
-    foo:
-        family: mammalia
-        integer: 5
-        ivec: [ 1, 1, 2, 3, 5, 8 ]
-        svec: [ uno, dos, tres, cuatro, a=b^2+c^2 ]
-    bar:
-        family: reptilia
-        integerXX: 5
+common:
+    examples:
+        example_dictionary:
+            foo:
+                family: mammalia
+                integer: 5
+                ivec: [ 1, 1, 2, 3, 5, 8 ]
+                svec: [ uno, dos, tres, cuatro, a=b^2+c^2 ]
+            bar:
+                family: reptilia
+                integerXX: 5
+                floatx: 1.2e-12
 ...

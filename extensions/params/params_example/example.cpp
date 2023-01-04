@@ -35,7 +35,7 @@ int main()
         YAML::Node stream = YAML::Load(in_stream);
         params::dictionary<params::example_params_details> example_dict;
         params::helpers::yaml_read_assistant<params::example_params_details> yaml_reader(stream);
-        yaml_reader.get_all_lists("example_dictionary/", example_dict);
+        yaml_reader.get_all_lists("common/examples/example_dictionary/", example_dict);
         example_dict.set_defaults();
         std::cout << "Expected: dos" << std::endl;
         std::cout << example_dict.get("foo").get_vstring("svec")[1] << std::endl;

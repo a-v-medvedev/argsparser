@@ -19,6 +19,9 @@ struct yaml_read_assistant {
         for (const auto &name : node_names) {
             if (name.empty())
                 break;
+            if (!node.IsMap()) {
+                throw std::runtime_error("yaml_read_assistant::get_map_keys: entry is not a map");
+            }
             if (!node[name]) {
                 throw std::runtime_error("yaml_read_assistant::get_map_keys: entry does not exist in yaml stream");
             }

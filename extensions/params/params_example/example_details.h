@@ -39,7 +39,7 @@ struct example_params_details {
 
 	static const params::expected_params_t &get_expected_params() {
 		static const params::expected_params_t expected_params = {
-			{ "family",     { params::value::S, false,	ALLFAMILIES, 		        NOMINMAX, 		ALLALLOWED } },
+			{ "family",     { params::value::S, false,	ALLFAMILIES, 		        NOMINMAX, 		{"mammalia", "reptilia", "aves"} } },
 			{ "integer", 	{ params::value::I, true, 	ALLFAMILIES, 		        NOMINMAX, 		ALLALLOWED } },
 			{ "float", 	    { params::value::F, true, 	{ "mammalia", "aves" }, 	NOMINMAX, 		ALLALLOWED } },
 			{ "string", 	{ params::value::S, true, 	{ "mammalia", "reptilia" }, NOMINMAX, 		{ "test1", "test2", "test3" } } },
@@ -62,7 +62,6 @@ struct example_params_details {
 
 	static void set_family_defaults(my_list &list, const std::string &family, 
 									const std::string &list_name) {
-		(void)list_name;
 		if (family == "mammalia") {
 			list.set_value_if_missing<uint32_t>("integer", 56);
 			list.set_value_if_missing<float64_t>("float", 1.234);
@@ -81,7 +80,15 @@ struct example_params_details {
 			list.set_value_if_missing<float64_t>("float", 1.234);
 			list.set_value_if_missing<uint32_t>("integerx", 777);
 			list.set_value_if_missing<uint32_t>("integerX", 2);
-			list.set_value_if_missing<uint32_t>("integerXX", 5);
+            if (list_name == "baz") {
+                if (!list.is_value_set("integerXX")) {
+                    throw std::runtime_error(std::string("Parameter list ") + list_name + " : required field is missing: " + "integerXX");
+                }
+            } else if (list_name == "qux") {
+			    list.set_value_if_missing<uint32_t>("integerXX", 1);
+            } else {
+			    list.set_value_if_missing<uint32_t>("integerXX", 5);
+            }
 		}
 	}
 
@@ -93,7 +100,9 @@ struct example_params_details {
 			params.add("bar", my_list {"family", "reptilia"});
 		}
 		if (!params.find("baz")) {
-			params.add("baz", my_list {"family", "aves"});
+            my_list list {"family", "aves"};
+            list.set_value<uint32_t>("integerXX", 2);
+			params.add("baz", list);
 		}
 		if (!params.find("qux")) {
 			params.add("qux", my_list {"family", "aves"});

@@ -13,8 +13,8 @@ TARGETS = example
 override INCLUDES += -I$(PARAMS_DIR)
 override LIBS += -L$(BASEPATH)/argsparser.bin -largsparser -Wl,-rpath=$(BASEPATH)/argsparser.bin
 
-override INCLUDES += -Ithirdparty/yaml-cpp.bin/include
-override LIBS += -Lthirdparty/yaml-cpp.bin/lib -lyaml-cpp -Wl,-rpath=thirdparty/yaml-cpp.bin/lib
+override INCLUDES += -I$(BASEPATH)/yaml-cpp.bin/include
+override LIBS += -L$(BASEPATH)/yaml-cpp.bin/lib -lyaml-cpp -Wl,-rpath=$(BASEPATH)/yaml-cpp.bin/lib
 
 override CXXFLAGS += -Wall -Wextra -std=c++11 -O0 -g $(INCLUDES)
 
