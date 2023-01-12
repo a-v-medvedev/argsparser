@@ -28,6 +28,9 @@ struct yaml_read_assistant {
             node.reset(node[name].as<YAML::Node>());
         }
         if (!node.IsMap()) {
+            if (node.IsNull()) {
+                return;
+            }
             throw std::runtime_error("yaml_read_assistant::get_map_keys: entry is not a map");
         }
         for(auto it = node.begin(); it != node.end(); ++it) {
