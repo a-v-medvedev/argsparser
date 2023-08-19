@@ -6,7 +6,7 @@
 
 # Params extension unit tests
 
-BASEPATH = ../..
+BASEPATH = ../../..
 PARAMS_DIR = $(BASEPATH)/extensions/params
 TARGETS = params_utest
 

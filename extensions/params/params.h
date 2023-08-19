@@ -70,9 +70,12 @@ public:
     list() {}
     list(std::initializer_list<std::string> l) {
         assert(l.size() == 2);
-        set_value(*(l.begin()), *(l.begin() + 1));
+        auto &key = *(l.begin());
+        auto &value = *(l.begin() + 1);
+        init(key, value);
     }
 protected:
+    void init(const std::string &key, const std::string &value);
     expected_params_t::const_iterator is_in_expected_params(const std::string &key) const;
     std::map<std::string, value> l;
     std::map<std::string, std::function<std::string(value)>> print_converters;

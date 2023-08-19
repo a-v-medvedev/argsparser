@@ -142,6 +142,9 @@ void args_parser::option_vector::from_yaml(const YAML::Node& node)
     if (!node.IsSequence()) {
         throw yaml_error_t::NOT_SEQUENCE;
     }
+    if (!required && defaulted && !defaultize_before_parsing) {
+        val.resize(0);
+    }
     if (val.size() < node.size()) {
         val.resize(node.size());
     }

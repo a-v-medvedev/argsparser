@@ -8,21 +8,6 @@
 
 namespace params {
 
-namespace helpers {
-
-static inline std::vector<std::string> str_split(const std::string &s, char delimiter)
-{
-   std::vector<std::string> result;
-   std::string token;
-   std::istringstream token_stream(s);
-   while (std::getline(token_stream, token, delimiter)) {
-      result.push_back(token);
-   }
-   return result;
-}
-
-}
-
 template <class details>
 bool overrides_holder<details>::find(size_t layer) 
 { 

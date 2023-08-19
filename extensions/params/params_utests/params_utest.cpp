@@ -120,6 +120,7 @@ void testsuite_2(int argc, char **argv)
     (void)argc; (void)argv;
     utest_dictionary params;
     params.add("foo", {"family", "xxx"});
+    params.add("foo", {"ivec", "1,4"});
     params.set_defaults();
 }
 

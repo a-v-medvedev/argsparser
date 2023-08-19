@@ -13,8 +13,53 @@
 
 #include <iostream>
 #include <iomanip>
+#include <stdexcept>
 
 namespace params {
+
+namespace helpers {
+
+static inline std::vector<std::string> str_split(const std::string &s, char delimiter)
+{
+   std::vector<std::string> result;
+   std::string token;
+   std::istringstream token_stream(s);
+   while (std::getline(token_stream, token, delimiter)) {
+      result.push_back(token);
+   }
+   return result;
+}
+
+}
+    
+}
+
+namespace params {
+
+template <class details>
+void list<details>::init(const std::string &key, const std::string &value) {
+    const auto &expected_params = details::get_expected_params();
+	auto item_it = is_in_expected_params(key);
+	if (item_it == expected_params.end()) {
+		throw std::runtime_error(std::string("params: list: unknown parameter: ") + key);
+	}
+	switch (item_it->second.type) {
+		case value::I:
+		case value::F:
+		case value::B:
+		case value::S: parse_and_set_value(key, value);
+					   break;
+		case value::NUL: throw std::runtime_error(std::string("params: list: parameter is not defined correctly: ") + key); break;
+		case value::IV:
+		case value::FV:
+		case value::BV:
+		case value::SV: {
+							auto vvalues = helpers::str_split(value, ',');
+							parse_and_set_value(key, vvalues);
+							break;
+						}
+	}
+}
 
 template <class details>
 typename expected_params_t::const_iterator 
