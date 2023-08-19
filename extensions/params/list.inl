@@ -43,22 +43,12 @@ void list<details>::init(const std::string &key, const std::string &value) {
 	if (item_it == expected_params.end()) {
 		throw std::runtime_error(std::string("params: list: unknown parameter: ") + key);
 	}
-	switch (item_it->second.type) {
-		case value::I:
-		case value::F:
-		case value::B:
-		case value::S: parse_and_set_value(key, value);
-					   break;
-		case value::NUL: throw std::runtime_error(std::string("params: list: parameter is not defined correctly: ") + key); break;
-		case value::IV:
-		case value::FV:
-		case value::BV:
-		case value::SV: {
-							auto vvalues = helpers::str_split(value, ',');
-							parse_and_set_value(key, vvalues);
-							break;
-						}
-	}
+    if (item_it->second.is_vector()) {
+        auto vvalues = helpers::str_split(value, ',');
+		parse_and_set_value(key, vvalues);
+    } else {
+        parse_and_set_value(key, value);
+    }
 }
 
 template <class details>

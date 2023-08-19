@@ -128,7 +128,7 @@ void testsuite_3(int argc, char **argv)
 {
     (void)argc; (void)argv;
     utest_dictionary params;
-    params.add_map("foo", {{"family", "yyy"}, {"aaa", "50"}});
+    params.add_map("foo", {{"family", "yyy"}, {"aaa", "50"}, {"ivec", "1,4"}});
     std::map<std::string, std::string> baz_params_dict;
     baz_params_dict["family"] = "zzz";
     baz_params_dict["aaa"] = "3";

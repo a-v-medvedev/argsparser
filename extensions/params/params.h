@@ -56,6 +56,7 @@ struct param_traits {
     std::vector<std::string> matching_families;
     std::vector<std::string> minmax;
     std::vector<std::string> allowed_values;
+    bool is_vector() const { return (type == value::type_t::IV || type == value::type_t::FV || type == value::type_t::SV || type == value::type_t::BV); }
 };
 
 using expected_params_t = std::vector<std::pair<std::string, param_traits>>;

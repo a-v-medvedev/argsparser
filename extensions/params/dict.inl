@@ -16,9 +16,21 @@ void dictionary<details>::add(const std::string &name, const list<details> &l) {
 
 template <class details>
 void dictionary<details>::add_map(const std::string &name, const std::map<std::string, std::string> &kvmap) {
+    const auto &expected_params = details::get_expected_params();
     list<details> l;
     for (auto &kv : kvmap) {
-        l.parse_and_set_value(kv.first, kv.second);
+		auto &key = kv.first;
+		auto &value = kv.second;
+		auto item_it = l.is_in_expected_params(key);
+		if (item_it == expected_params.end()) {
+			throw std::runtime_error(std::string("params: add_map: unknown parameter: ") + key);
+		}
+		if (item_it->second.is_vector()) {
+			auto vvalues = helpers::str_split(value, ',');
+			l.parse_and_set_value(key, vvalues);
+		} else {
+			l.parse_and_set_value(key, value);
+		}
     }
     typedef std::pair<std::string, list<details>> item;
     m.insert(item(name, l));
