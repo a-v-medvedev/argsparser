@@ -87,10 +87,10 @@ void args_parser::value::sanity_check(arg_t _type) const {
 
 const std::string args_parser::value::get_type_str(arg_t _type) {
     switch(_type) {
-        case STRING: return "STRING"; break;
-        case INT: return "INT"; break;
-        case FLOAT: return "FLOAT"; break;
-        case BOOL: return "BOOL"; break;
+        case STRING: return "STRING";
+        case INT: return "INT";
+        case FLOAT: return "FLOAT";
+        case BOOL: return "BOOL";
         default: assert(NULL == "Impossible case in switch(type)");                    
     }
     return "";

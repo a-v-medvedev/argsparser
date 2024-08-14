@@ -37,7 +37,7 @@ template<> void value::autoconv<value::F>() {
     switch (type) {
         case I: f = (float64_t)i; type = F; break;
         case F: break;
-        case S: throw std::runtime_error(std::string("params: autoconv<F>: autoconvertion of a parameter from string requested")); break;
+        case S: throw std::runtime_error(std::string("params: autoconv<F>: autoconvertion of a parameter from string requested"));
         case B: f = (b ? 1.0f : 0.0f); break;
         case NUL: break;
         case IV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector"));
