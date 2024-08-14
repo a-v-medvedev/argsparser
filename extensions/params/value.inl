@@ -22,13 +22,13 @@ template<> void value::autoconv<value::I>() {
     switch (type) {
         case I: break;
         case F: i = (uint32_t)f; type = I; break;
-        case S: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from string requested")); break;
+        case S: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from string requested"));
         case B: i = (b ? 1 : 0); break;
         case NUL: break;
-        case IV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
-        case FV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
-        case SV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
-        case BV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
+        case IV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector"));
+        case FV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector"));
+        case SV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector"));
+        case BV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector"));
         // TODO all vectors
     }
 }
@@ -40,10 +40,10 @@ template<> void value::autoconv<value::F>() {
         case S: throw std::runtime_error(std::string("params: autoconv<F>: autoconvertion of a parameter from string requested")); break;
         case B: f = (b ? 1.0f : 0.0f); break;
         case NUL: break;
-        case IV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
-        case FV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
-        case SV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
-        case BV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector")); break;
+        case IV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector"));
+        case FV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector"));
+        case SV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector"));
+        case BV: throw std::runtime_error(std::string("params: autoconv<I>: autoconvertion of a parameter from vector"));
         // TODO all vectors
     }
 }

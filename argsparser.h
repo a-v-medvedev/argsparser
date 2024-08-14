@@ -39,7 +39,7 @@ class args_parser {
     const char *option_starter;
     const char option_delimiter;
     std::ostream &sout;
-    const static int version;
+    static const int version;
     std::string program_name;
     bool parse_done = false;
 

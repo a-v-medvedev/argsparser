@@ -350,7 +350,6 @@ bool list<details>::is_value_allowed(const std::string &key, const value &p) {
         case value::SV: return is_allowed_vec<std::string>(key, p);
     }
     throw std::runtime_error(std::string("params: is_value_allowed: unknown value type: ") + key);
-    return false;
 }
 
 template <class details>
