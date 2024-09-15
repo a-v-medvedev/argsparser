@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Alexey V. Medvedev
+ * Copyright (c) 2020-2024 Alexey V. Medvedev
  * This code is licensed under 3-Clause BSD License.
  * See license.txt file for details.
  */

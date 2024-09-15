@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Alexey V. Medvedev
+ * Copyright (c) 2020-2024 Alexey V. Medvedev
  * This code is licensed under 3-Clause BSD License.
  * See license.txt file for details.
  */
@@ -84,16 +84,37 @@ struct yaml_read_assistant {
             [&](const std::string &k, const std::vector<std::string> &vec) { list.parse_and_set_value(k, vec); });
         dict.add(short_entry_name, list);
     }
-    void get_all_lists(const std::string &dictionary_entry, params::dictionary<T> &dict) {
+    bool dictionary_exists(const std::string &entry) {
+        if (entry.empty()) 
+            return false;
+        YAML::Node node = stream;
+        auto node_names = str_split(entry, '/');
+        for (const auto &name : node_names) {
+            if (name.empty())
+                break;
+            if (!node.IsMap()) {
+                throw std::runtime_error("yaml_read_assistant::get_map_keys: entry is not a map");
+            }
+            if (!node[name]) {
+                return false;
+            }
+            node.reset(node[name].as<YAML::Node>());
+        }
+        return node.IsMap();
+    }
+    bool get_all_lists(const std::string &dictionary_entry, params::dictionary<T> &dict) {
         if (dictionary_entry.back() != '/') {
             throw std::runtime_error("yaml_read_assistant::get_all_lists: yaml dictionary entry name must end with '/'");
         }
+        if (!dictionary_exists(dictionary_entry))
+            return false;
         std::vector<std::string> keys;
         get_map_keys(dictionary_entry, keys);
         for (const auto &key : keys) {
             auto list_entry = dictionary_entry + key;
             get_list(list_entry, dict);
         }
+        return true;
     }
 };
 
