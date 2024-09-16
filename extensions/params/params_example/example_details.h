@@ -39,6 +39,7 @@ struct example_params_details {
 
 	static const params::expected_params_t &get_expected_params() {
 		static const params::expected_params_t expected_params = {
+                            // type, changeable, {matching_families,}, {min,max}, {allowed_values,};
 			{ "family",     { params::value::S, false,	ALLFAMILIES, 		        NOMINMAX, 		{"mammalia", "reptilia", "aves"} } },
 			{ "integer", 	{ params::value::I, true, 	ALLFAMILIES, 		        NOMINMAX, 		ALLALLOWED } },
 			{ "float", 	    { params::value::F, true, 	{ "mammalia", "aves" }, 	NOMINMAX, 		ALLALLOWED } },
@@ -60,6 +61,12 @@ struct example_params_details {
 #undef NOMINMAX 
 #undef ALLALLOWED 
 
+    static void throw_if_missing(my_list &list, const std::string &list_name, const std::string &param) {
+         if (!list.is_value_set(param)) {
+             throw std::runtime_error(std::string("Parameter list \"") + list_name + "\": required field is missing: " + param);
+         }
+    }
+
 	static void set_family_defaults(my_list &list, const std::string &family, 
 									const std::string &list_name) {
 		if (family == "mammalia") {
@@ -69,6 +76,8 @@ struct example_params_details {
 			list.set_value_if_missing<std::string>("string", "test2");
 			list.set_value_if_missing<uint32_t>("integerX", 2);
 			list.set_value_if_missing<uint32_t>("integerXX", 5);
+            if (list_name == "foo")
+                throw_if_missing(list, list_name, "svec");
 		} else if (family == "reptilia") {
 			list.set_value_if_missing<uint32_t>("integerx", 777);
 			list.set_value_if_missing<float64_t>("float", 4.567);
@@ -81,9 +90,7 @@ struct example_params_details {
 			list.set_value_if_missing<uint32_t>("integerx", 777);
 			list.set_value_if_missing<uint32_t>("integerX", 2);
             if (list_name == "baz") {
-                if (!list.is_value_set("integerXX")) {
-                    throw std::runtime_error(std::string("Parameter list ") + list_name + " : required field is missing: " + "integerXX");
-                }
+                throw_if_missing(list, list_name, "integerXX");
             } else if (list_name == "qux") {
 			    list.set_value_if_missing<uint32_t>("integerXX", 1);
             } else {

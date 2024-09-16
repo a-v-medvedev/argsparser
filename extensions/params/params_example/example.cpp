@@ -14,10 +14,10 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "params.h"
-#include "params.inl"
+#include <params.h>
+#include <params.inl>
+#include <yamlassist.inl>
 #include "example_details.h"
-#include "helpers.inl"
 
 
 //int main(int argc, char **argv)
@@ -34,9 +34,10 @@ int main()
         }
         YAML::Node stream = YAML::Load(in_stream);
         params::dictionary<params::example_params_details> example_dict;
-        params::helpers::yaml_read_assistant<params::example_params_details> yaml_reader(stream);
-        if (!yaml_reader.get_all_lists("common/examples/example_dictionary/", example_dict)) {
-            std::cout << "No expected dictionary in the yaml file: " << file << std::endl;
+        params::yaml_read_assistant<params::example_params_details> yaml_reader(stream);
+        const std::string dict_name = "common/examples/example_dictionary/";
+        if (!yaml_reader.get_all_lists(dict_name, example_dict)) {
+            std::cout << "No expected dictionary \"" << dict_name << "\"in the yaml file: " << file << std::endl;
             return 1;
         }
         example_dict.set_defaults();

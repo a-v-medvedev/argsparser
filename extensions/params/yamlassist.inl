@@ -7,15 +7,13 @@
 
 namespace params {
 
-namespace helpers {
-
 template <typename T>
 struct yaml_read_assistant {
     const YAML::Node &stream;
     yaml_read_assistant(const YAML::Node &stream_) : stream(stream_) {}
     void get_map_keys(const std::string &entry, std::vector<std::string> &keys) {
         YAML::Node node = stream;
-        auto node_names = str_split(entry, '/');
+        auto node_names = helpers::str_split(entry, '/');
         for (const auto &name : node_names) {
             if (name.empty())
                 break;
@@ -38,15 +36,16 @@ struct yaml_read_assistant {
             keys.push_back(k);
         }
     }
-    
+
+    template <typename VALUET = std::string>    
     void iterate_over_map(const std::string &entry, std::string &short_entry_name,
-                          std::function<void(const std::string &k, const std::string &v)> func,
-                          std::function<void(const std::string &k, const std::vector<std::string> &vec)> funcv) {
+                          std::function<void(const std::string &k, const VALUET &v)> func,
+                          std::function<void(const std::string &k, const std::vector<VALUET> &vec)> funcv) {
         if (entry.back() == '/') {
             throw std::runtime_error("yaml_read_assistant::iterate_over_map: yaml entry name must not end with '/'");
         }
         YAML::Node node = stream;
-        auto node_names = str_split(entry, '/');
+        auto node_names = helpers::str_split(entry, '/');
         for (const auto &name : node_names) {
             if (!node[name]) {
                 throw std::runtime_error("yaml_read_assistant::iterate_over_map: entry does not exist in yaml stream");
@@ -59,10 +58,10 @@ struct yaml_read_assistant {
         for (auto it = node.begin(); it != node.end(); ++it) {
             std::string k = it->first.as<std::string>();
             if (it->second.IsSequence()) {
-                auto vec = it->second.as<std::vector<std::string>>();
+                auto vec = it->second.as<std::vector<VALUET>>();
                 funcv(k, vec);
             } else if (it->second.IsScalar()) {
-                std::string v = it->second.as<std::string>();
+                auto v = it->second.as<VALUET>();
                 func(k, v);
             } else {
                 throw std::runtime_error("yaml_read_assistant::iterate_over_map: wrong map structure: it may contain only scalars or sequences");
@@ -79,7 +78,7 @@ struct yaml_read_assistant {
             list.parse_and_set_value("-", "-");
         }
         std::string short_entry_name;
-        iterate_over_map(entry, short_entry_name,
+        iterate_over_map<std::string>(entry, short_entry_name,
             [&](const std::string &k, const std::string &v) { list.parse_and_set_value(k, v); },
             [&](const std::string &k, const std::vector<std::string> &vec) { list.parse_and_set_value(k, vec); });
         dict.add(short_entry_name, list);
@@ -88,7 +87,7 @@ struct yaml_read_assistant {
         if (entry.empty()) 
             return false;
         YAML::Node node = stream;
-        auto node_names = str_split(entry, '/');
+        auto node_names = helpers::str_split(entry, '/');
         for (const auto &name : node_names) {
             if (name.empty())
                 break;
@@ -120,4 +119,4 @@ struct yaml_read_assistant {
 
 }
 
-}
+
